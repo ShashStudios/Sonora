@@ -1,6 +1,38 @@
+interface FinancialMetric {
+  year: number;
+  occupancy: number;
+  adr: number;
+  revpar: number;
+  totalRevenue: number;
+  totalExpenses: number;
+  noi: number;
+  noiMargin: number;
+}
+
+interface HotelAssumptions {
+  numberOfRooms: number;
+  baseOccupancyRate: number;
+  baseADR: number;
+  adrGrowthRate: number;
+  occupancyGrowthRate: number;
+  expenseGrowthRate: number;
+}
+
+interface Summary {
+  totalRevenue: number;
+  totalExpenses: number;
+  noi: number;
+  occupancy: number;
+  revpar: number;
+}
+
 export async function POST(request: Request) {
   try {
-    const { assumptions, metrics, summary } = await request.json();
+    const { assumptions, metrics, summary }: {
+      assumptions: HotelAssumptions;
+      metrics: FinancialMetric[];
+      summary: Summary;
+    } = await request.json();
     
     console.log('API Route called with:', { assumptions, metrics: metrics?.length, summary });
     

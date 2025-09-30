@@ -76,23 +76,35 @@ export const generatePDFReport = async (reportData: ReportData, aiReport: string
   pdf.setTextColor(0, 0, 0); // Reset to black
   
   // Add key metrics summary
-  const summary = reportData.summary || {};
+  const summary = reportData.summary || {
+    totalRevenue: 0,
+    totalExpenses: 0,
+    noi: 0,
+    occupancy: 0,
+    revpar: 0
+  };
   const metrics = reportData.metrics || [];
-  const year5Data = metrics[4] || {};
+  const year5Data = metrics[4] || {
+    totalRevenue: 0,
+    totalExpenses: 0,
+    noi: 0,
+    occupancy: 0,
+    revpar: 0
+  };
   
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'normal');
   
   const summaryText = [
-    `Your hotel is projected to generate $${(summary.totalRevenue || year5Data.totalRevenue || 0).toLocaleString()} in Year 5 revenue,`,
+    `Your hotel is projected to generate $${(summary.totalRevenue || year5Data.totalRevenue).toLocaleString()} in Year 5 revenue,`,
     `which is above the national average for similar properties in your area.`,
-    `This strong performance is driven by your ${(summary.occupancy || year5Data.occupancy || 0).toFixed(1)}% occupancy rate`,
-    `and $${(summary.revpar || year5Data.revpar || 0).toFixed(0)} RevPAR, indicating healthy market demand and pricing power.`,
+    `This strong performance is driven by your ${(summary.occupancy || year5Data.occupancy).toFixed(1)}% occupancy rate`,
+    `and $${(summary.revpar || year5Data.revpar).toFixed(0)} RevPAR, indicating healthy market demand and pricing power.`,
     ``,
     `Key highlights:`,
-    `• Year 5 NOI: $${(summary.noi || year5Data.noi || 0).toLocaleString()}`,
-    `• Occupancy Growth: ${(((summary.occupancy || year5Data.occupancy || 0) / 70 - 1) * 100).toFixed(1)}% over 5 years`,
-    `• Revenue Growth: ${(((summary.totalRevenue || year5Data.totalRevenue || 0) / 4407375 - 1) * 100).toFixed(1)}% over 5 years`
+    `• Year 5 NOI: $${(summary.noi || year5Data.noi).toLocaleString()}`,
+    `• Occupancy Growth: ${(((summary.occupancy || year5Data.occupancy) / 70 - 1) * 100).toFixed(1)}% over 5 years`,
+    `• Revenue Growth: ${(((summary.totalRevenue || year5Data.totalRevenue) / 4407375 - 1) * 100).toFixed(1)}% over 5 years`
   ];
   
   let yPosition = 120;
@@ -225,17 +237,29 @@ const addFinancialTables = (pdf: jsPDF, reportData: ReportData) => {
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
   
-  const summary = reportData.summary || {};
+  const summary = reportData.summary || {
+    totalRevenue: 0,
+    totalExpenses: 0,
+    noi: 0,
+    occupancy: 0,
+    revpar: 0
+  };
   const metrics = reportData.metrics || [];
-  const year5Data = metrics[4] || {};
+  const year5Data = metrics[4] || {
+    totalRevenue: 0,
+    totalExpenses: 0,
+    noi: 0,
+    occupancy: 0,
+    revpar: 0
+  };
   
   const kpiData = [
-    ['Year 5 Total Revenue', `$${(summary.totalRevenue || year5Data.totalRevenue || 0).toLocaleString()}`],
-    ['Year 5 NOI', `$${(summary.noi || year5Data.noi || 0).toLocaleString()}`],
-    ['Year 5 Occupancy', `${(summary.occupancy || year5Data.occupancy || 0).toFixed(1)}%`],
-    ['Year 5 RevPAR', `$${(summary.revpar || year5Data.revpar || 0).toFixed(0)}`],
-    ['5-Year Revenue Growth', `${(((summary.totalRevenue || year5Data.totalRevenue || 0) / 4407375 - 1) * 100).toFixed(1)}%`],
-    ['5-Year NOI Growth', `${(((summary.noi || year5Data.noi || 0) / 1322213 - 1) * 100).toFixed(1)}%`]
+    ['Year 5 Total Revenue', `$${(summary.totalRevenue || year5Data.totalRevenue).toLocaleString()}`],
+    ['Year 5 NOI', `$${(summary.noi || year5Data.noi).toLocaleString()}`],
+    ['Year 5 Occupancy', `${(summary.occupancy || year5Data.occupancy).toFixed(1)}%`],
+    ['Year 5 RevPAR', `$${(summary.revpar || year5Data.revpar).toFixed(0)}`],
+    ['5-Year Revenue Growth', `${(((summary.totalRevenue || year5Data.totalRevenue) / 4407375 - 1) * 100).toFixed(1)}%`],
+    ['5-Year NOI Growth', `${(((summary.noi || year5Data.noi) / 1322213 - 1) * 100).toFixed(1)}%`]
   ];
   
   yPos = dataY + 35;
