@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,7 +76,7 @@ export default function FormaPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'expenses' | 'profitability'>('overview');
   const [showReportModal, setShowReportModal] = useState(false);
 
-  const calculateMetrics = () => {
+  const calculateMetrics = useCallback(() => {
     const newMetrics: FinancialMetrics[] = [];
     
     for (let year = 1; year <= 5; year++) {
@@ -126,11 +126,11 @@ export default function FormaPage() {
     }
     
     setMetrics(newMetrics);
-  };
+  }, [assumptions]);
 
   useEffect(() => {
     calculateMetrics();
-  }, [assumptions]);
+  }, [assumptions, calculateMetrics]);
 
   const validateInput = (field: keyof HotelAssumptions, value: number): string | undefined => {
     switch (field) {

@@ -1,6 +1,34 @@
 import jsPDF from 'jspdf';
 
-export const generatePDFReport = async (reportData: any, aiReport: string, userName?: string) => {
+interface ReportData {
+  assumptions: {
+    numberOfRooms: number;
+    baseOccupancyRate: number;
+    baseADR: number;
+    adrGrowthRate: number;
+    occupancyGrowthRate: number;
+    expenseGrowthRate: number;
+  };
+  metrics: Array<{
+    year: number;
+    occupancy: number;
+    adr: number;
+    revpar: number;
+    totalRevenue: number;
+    totalExpenses: number;
+    noi: number;
+    noiMargin: number;
+  }>;
+  summary?: {
+    totalRevenue: number;
+    totalExpenses: number;
+    noi: number;
+    occupancy: number;
+    revpar: number;
+  };
+}
+
+export const generatePDFReport = async (reportData: ReportData, aiReport: string, userName?: string) => {
   const pdf = new jsPDF();
   
   // Add Bridge logo with proper aspect ratio
@@ -10,7 +38,7 @@ export const generatePDFReport = async (reportData: any, aiReport: string, userN
     const logoWidth = 40;
     const logoHeight = (logoImg.height * logoWidth) / logoImg.width;
     pdf.addImage(logoImg, 'PNG', 20, 20, logoWidth, logoHeight);
-  } catch (error) {
+  } catch {
     console.log('Logo not found, continuing without logo');
   }
   
@@ -115,7 +143,7 @@ const loadImage = (src: string): Promise<HTMLImageElement> => {
   });
 };
 
-const addFinancialTables = (pdf: jsPDF, reportData: any) => {
+const addFinancialTables = (pdf: jsPDF, reportData: ReportData) => {
   // Add a new page for financial data
   pdf.addPage();
   
@@ -167,7 +195,7 @@ const addFinancialTables = (pdf: jsPDF, reportData: any) => {
   
   // Draw table data
   let dataY = headerY + 8;
-  reportData.metrics.forEach((metric: any) => {
+  reportData.metrics.forEach((metric) => {
     xPos = 20;
     const row = [
       metric.year.toString(),
