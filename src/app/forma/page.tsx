@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,6 +60,8 @@ interface FinancialMetrics {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function FormaPage() {
+  const { user } = useUser();
+  
   const [assumptions, setAssumptions] = useState<HotelAssumptions>({
     numberOfRooms: 100,
     baseOccupancyRate: 70,
@@ -198,67 +201,56 @@ export default function FormaPage() {
     setShowReportModal(true);
   };
 
-  const downloadPDF = () => {
-    // Create a comprehensive PDF with all data and charts
-    const reportData = {
-      assumptions,
-      metrics,
-      generatedAt: new Date().toLocaleString(),
-      summary: {
-        totalRevenue: metrics[4]?.totalRevenue || 0,
-        totalExpenses: metrics[4]?.totalExpenses || 0,
-        noi: metrics[4]?.noi || 0,
-        occupancy: metrics[4]?.occupancy || 0,
-        revpar: metrics[4]?.revpar || 0
+  const downloadPDF = async () => {
+    try {
+      // Show loading state
+      setShowReportModal(false);
+      
+      // Generate AI report
+      console.log('Calling AI API with:', { assumptions, metrics: metrics.length });
+      
+      const response = await fetch('/api/generate-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assumptions,
+          metrics,
+          summary: {
+            totalRevenue: metrics[4]?.totalRevenue || 0,
+            totalExpenses: metrics[4]?.totalExpenses || 0,
+            noi: metrics[4]?.noi || 0,
+            occupancy: metrics[4]?.occupancy || 0,
+            revpar: metrics[4]?.revpar || 0
+          }
+        })
+      });
+      
+      console.log('API response status:', response.status);
+      const result = await response.json();
+      console.log('API response result:', result);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to generate report');
       }
-    };
-
-    // For now, we'll create a simple text-based report
-    // In a real implementation, you'd use a library like jsPDF or Puppeteer
-    const reportContent = `
-HOTEL PRO FORMA REPORT
-Generated: ${reportData.generatedAt}
-
-ASSUMPTIONS:
-- Number of Rooms: ${reportData.assumptions.numberOfRooms}
-- Base Occupancy Rate: ${reportData.assumptions.baseOccupancyRate}%
-- Base ADR: $${reportData.assumptions.baseADR}
-- ADR Growth Rate: ${reportData.assumptions.adrGrowthRate}%
-- Occupancy Growth Rate: ${reportData.assumptions.occupancyGrowthRate}%
-- Expense Growth Rate: ${reportData.assumptions.expenseGrowthRate}%
-
-5-YEAR SUMMARY:
-- Year 5 Total Revenue: $${reportData.summary.totalRevenue.toLocaleString()}
-- Year 5 Total Expenses: $${reportData.summary.totalExpenses.toLocaleString()}
-- Year 5 NOI: $${reportData.summary.noi.toLocaleString()}
-- Year 5 Occupancy: ${reportData.summary.occupancy.toFixed(1)}%
-- Year 5 RevPAR: $${reportData.summary.revpar.toFixed(0)}
-
-DETAILED METRICS:
-${metrics.map(metric => `
-Year ${metric.year}:
-  Occupancy: ${metric.occupancy.toFixed(1)}%
-  ADR: $${metric.adr.toLocaleString()}
-  RevPAR: $${metric.revpar.toLocaleString()}
-  Total Revenue: $${metric.totalRevenue.toLocaleString()}
-  Total Expenses: $${metric.totalExpenses.toLocaleString()}
-  NOI: $${metric.noi.toLocaleString()}
-  NOI Margin: ${metric.noiMargin.toFixed(1)}%
-`).join('')}
-    `;
-
-    // Create and download the file
-    const blob = new Blob([reportContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `hotel-pro-forma-report-${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    setShowReportModal(false);
+      
+      // Get user name from Clerk
+      const userName = user?.firstName || user?.fullName || 'Valued Client';
+      
+      // Generate PDF
+      const { generatePDFReport } = await import('@/lib/pdf-generator');
+      const pdf = await generatePDFReport({ assumptions, metrics }, result.report, userName);
+      
+      // Download with professional filename
+      const date = new Date().toISOString().split('T')[0];
+      const fileName = `Bridge_${userName.replace(/\s+/g, '_')}_${date}.pdf`;
+      pdf.save(fileName);
+      
+    } catch (error) {
+      console.error('Error generating report:', error);
+      
+      // Show error message to user
+      alert('Failed to generate AI report. Please check your internet connection and try again.');
+    }
   };
 
   const exportToCSV = () => {
@@ -1032,27 +1024,27 @@ Year ${metric.year}:
 
                   {/* Report Contents */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Report Contents</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">AI-Powered Report Contents</h3>
                     <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-gray-700">AI-generated executive summary</span>
+                      </div>
                       <div className="flex items-center space-x-2">
                         <CheckCircle className="h-4 w-4 text-green-500" />
                         <span className="text-gray-700">Complete 5-year financial projections</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-gray-700">Revenue and expense breakdowns</span>
+                        <span className="text-gray-700">Professional financial analysis</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-gray-700">NOI and profitability analysis</span>
+                        <span className="text-gray-700">Risk assessment and recommendations</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-gray-700">Key performance metrics</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-gray-700">Charts and visualizations</span>
+                        <span className="text-gray-700">Bridge-branded PDF format</span>
                       </div>
                     </div>
                   </div>
