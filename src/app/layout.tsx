@@ -29,12 +29,12 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <div className="flex min-h-screen flex-col">
-            <header className="flex w-full items-center justify-end px-6 py-4">
+          <div className="min-h-screen">
+            <div className="flex w-full items-center justify-end px-6 py-4 absolute top-0 right-0 z-10">
               <SignedIn>
                 <UserButton afterSignOutUrl="/" />
               </SignedIn>
-            </header>
+            </div>
             <div className="flex-1">{children}</div>
           </div>
         </body>

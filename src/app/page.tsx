@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -11,25 +12,36 @@ export default function Home() {
           height={38}
           priority
         />
+        <p className="text-gray-600 text-sm font-medium text-center sm:text-left">
+          Client Portal for Hotel Pro Forma Evaluations
+        </p>
         <div className="font-mono text-sm/6 text-center sm:text-left">
-          <p className="mb-2 tracking-[-.01em]">&gt; Simplifying access to Competitive Financing</p>
-          <p className="tracking-[-.01em]">&gt; Specialized Lenders for Every Stage of Growth</p>
+          <p className="mb-2 tracking-[-.01em]">&gt; Build professional hotel financial projections</p>
+          <p className="mb-2 tracking-[-.01em]">&gt; Real-time calculations and visualizations</p>
+          <p className="tracking-[-.01em]">&gt; Export comprehensive reports instantly</p>
         </div>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
+          <Link
             className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="/sign-in"
+            href="/forma"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M7 17L17 7M17 7H7M17 7V17"
+              />
+            </svg>
             Get started
-          </a>
+          </Link>
           <a
             className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
             href="https://www.bridgemarketplace.com/"
