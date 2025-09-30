@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,6 +62,8 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function FormaPage() {
   const { user } = useUser();
+  const { isLoaded, isSignedIn } = useAuth();
+  const router = useRouter();
   
   const [assumptions, setAssumptions] = useState<HotelAssumptions>({
     numberOfRooms: 100,
@@ -131,6 +134,30 @@ export default function FormaPage() {
   useEffect(() => {
     calculateMetrics();
   }, [assumptions, calculateMetrics]);
+
+  // Show loading state while checking authentication
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push('/sign-in');
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  // Don't render anything if not signed in (will redirect)
+  if (!isSignedIn) {
+    return null;
+  }
 
   const validateInput = (field: keyof HotelAssumptions, value: number): string | undefined => {
     switch (field) {
