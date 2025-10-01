@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { 
   Download, 
   TrendingUp, 
@@ -60,6 +61,30 @@ interface FinancialMetrics {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
+// Chart configuration for shadcn/ui charts
+const chartConfig = {
+  revenue: {
+    label: "Revenue",
+    color: "#10B981",
+  },
+  expenses: {
+    label: "Expenses", 
+    color: "#EF4444",
+  },
+  noi: {
+    label: "NOI",
+    color: "#3B82F6",
+  },
+  revpar: {
+    label: "RevPAR",
+    color: "#8B5CF6",
+  },
+  occupancy: {
+    label: "Occupancy",
+    color: "#F59E0B",
+  },
+} satisfies ChartConfig;
+
 export default function FormaPage() {
   const { user } = useUser();
   const { isLoaded, isSignedIn } = useAuth();
@@ -78,6 +103,10 @@ export default function FormaPage() {
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [activeTab, setActiveTab] = useState<'overview' | 'revenue' | 'expenses' | 'profitability'>('overview');
   const [showReportModal, setShowReportModal] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [loadingStep, setLoadingStep] = useState('');
+  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const calculateMetrics = useCallback(() => {
     const newMetrics: FinancialMetrics[] = [];
@@ -230,8 +259,29 @@ export default function FormaPage() {
 
   const downloadPDF = async () => {
     try {
-      // Show loading state
-      setShowReportModal(false);
+      // Show loading state in the same modal
+      setIsGeneratingReport(true);
+      setCompletedSteps([]);
+      setCurrentStepIndex(0);
+      
+      // Professional loading steps
+      const steps = [
+        'Initializing AI report generation...',
+        'Analyzing hotel financial data...',
+        'Generating executive summary...',
+        'Creating 5-year projections...',
+        'Compiling risk assessment...',
+        'Finalizing professional report...',
+        'Preparing PDF download...'
+      ];
+      
+      // Simulate step-by-step progress
+      for (let i = 0; i < steps.length; i++) {
+        setCurrentStepIndex(i);
+        setLoadingStep(steps[i]);
+        await new Promise(resolve => setTimeout(resolve, 800));
+        setCompletedSteps(prev => [...prev, steps[i]]);
+      }
       
       // Generate AI report
       console.log('Calling AI API with:', { assumptions, metrics: metrics.length });
@@ -277,6 +327,13 @@ export default function FormaPage() {
       
       // Show error message to user
       alert('Failed to generate AI report. Please check your internet connection and try again.');
+    } finally {
+      // Reset loading state and close modal
+      setIsGeneratingReport(false);
+      setLoadingStep('');
+      setCompletedSteps([]);
+      setCurrentStepIndex(0);
+      setShowReportModal(false);
     }
   };
 
@@ -616,10 +673,10 @@ export default function FormaPage() {
         </Card>
 
         {/* Navigation Tabs */}
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
+        <div className="flex space-x-2 bg-gray-100 p-2 rounded-lg w-fit">
           <button 
             onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2 font-medium rounded-md shadow-sm transition-colors ${
+            className={`px-6 py-2 font-medium rounded-md shadow-sm transition-colors ${
               activeTab === 'overview' 
                 ? 'bg-white text-gray-900' 
                 : 'text-gray-600 hover:text-gray-900'
@@ -629,7 +686,7 @@ export default function FormaPage() {
           </button>
           <button 
             onClick={() => setActiveTab('revenue')}
-            className={`px-4 py-2 font-medium rounded-md shadow-sm transition-colors ${
+            className={`px-6 py-2 font-medium rounded-md shadow-sm transition-colors ${
               activeTab === 'revenue' 
                 ? 'bg-white text-gray-900' 
                 : 'text-gray-600 hover:text-gray-900'
@@ -639,7 +696,7 @@ export default function FormaPage() {
           </button>
           <button 
             onClick={() => setActiveTab('expenses')}
-            className={`px-4 py-2 font-medium rounded-md shadow-sm transition-colors ${
+            className={`px-6 py-2 font-medium rounded-md shadow-sm transition-colors ${
               activeTab === 'expenses' 
                 ? 'bg-white text-gray-900' 
                 : 'text-gray-600 hover:text-gray-900'
@@ -649,7 +706,7 @@ export default function FormaPage() {
           </button>
           <button 
             onClick={() => setActiveTab('profitability')}
-            className={`px-4 py-2 font-medium rounded-md shadow-sm transition-colors ${
+            className={`px-6 py-2 font-medium rounded-md shadow-sm transition-colors ${
               activeTab === 'profitability' 
                 ? 'bg-white text-gray-900' 
                 : 'text-gray-600 hover:text-gray-900'
@@ -672,28 +729,99 @@ export default function FormaPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue vs Expenses Trend</h3>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ChartContainer config={chartConfig} className="h-[300px]">
                     <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="year" />
-                      <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`} />
-                      <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, '']} />
-                      <Line type="monotone" dataKey="revenue" stroke="#10B981" strokeWidth={3} name="Revenue" />
-                      <Line type="monotone" dataKey="expenses" stroke="#EF4444" strokeWidth={3} name="Expenses" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
+                      <XAxis 
+                        dataKey="year" 
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip 
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="rounded-lg border bg-white p-3 shadow-md">
+                                <p className="text-sm font-medium text-gray-900">Year {label}</p>
+                                {payload.map((entry, index) => (
+                                  <p key={index} className="text-sm" style={{ color: entry.color }}>
+                                    {entry.name}: ${entry.value?.toLocaleString()}
+                                  </p>
+                                ))}
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="revenue" 
+                        stroke="var(--color-revenue)" 
+                        strokeWidth={3} 
+                        name="Revenue"
+                        dot={{ fill: "var(--color-revenue)", strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: "var(--color-revenue)", strokeWidth: 2 }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="expenses" 
+                        stroke="var(--color-expenses)" 
+                        strokeWidth={3} 
+                        name="Expenses"
+                        dot={{ fill: "var(--color-expenses)", strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: "var(--color-expenses)", strokeWidth: 2 }}
+                      />
                     </LineChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">NOI Trend</h3>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ChartContainer config={chartConfig} className="h-[300px]">
                     <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="year" />
-                      <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`} />
-                      <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, '']} />
-                      <Bar dataKey="noi" fill="#3B82F6" name="NOI" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
+                      <XAxis 
+                        dataKey="year" 
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip 
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="rounded-lg border bg-white p-3 shadow-md">
+                                <p className="text-sm font-medium text-gray-900">Year {label}</p>
+                                <p className="text-sm" style={{ color: payload[0].color }}>
+                                  NOI: ${payload[0].value?.toLocaleString()}
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Bar 
+                        dataKey="noi" 
+                        fill="var(--color-noi)" 
+                        name="NOI"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </div>
               </div>
             </CardContent>
@@ -712,7 +840,7 @@ export default function FormaPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Composition</h3>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ChartContainer config={chartConfig} className="h-[300px]">
                     <PieChart>
                       <Pie
                         data={[
@@ -730,21 +858,64 @@ export default function FormaPage() {
                         <Cell fill="#10B981" />
                         <Cell fill="#3B82F6" />
                       </Pie>
-                      <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, '']} />
+                      <Tooltip 
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="rounded-lg border bg-white p-3 shadow-md">
+                                <p className="text-sm font-medium text-gray-900">{payload[0].name}</p>
+                                <p className="text-sm" style={{ color: payload[0].color }}>
+                                  ${payload[0].value?.toLocaleString()}
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
                     </PieChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Growth</h3>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ChartContainer config={chartConfig} className="h-[300px]">
                     <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="year" />
-                      <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`} />
-                      <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, '']} />
-                      <Bar dataKey="revenue" fill="#10B981" name="Total Revenue" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
+                      <XAxis 
+                        dataKey="year" 
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip 
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="rounded-lg border bg-white p-3 shadow-md">
+                                <p className="text-sm font-medium text-gray-900">Year {label}</p>
+                                <p className="text-sm" style={{ color: payload[0].color }}>
+                                  Total Revenue: ${payload[0].value?.toLocaleString()}
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Bar 
+                        dataKey="revenue" 
+                        fill="var(--color-revenue)" 
+                        name="Total Revenue"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </div>
               </div>
             </CardContent>
@@ -763,7 +934,7 @@ export default function FormaPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Expense Breakdown</h3>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ChartContainer config={chartConfig} className="h-[300px]">
                     <PieChart>
                       <Pie
                         data={expenseData}
@@ -779,21 +950,64 @@ export default function FormaPage() {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, '']} />
+                      <Tooltip 
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="rounded-lg border bg-white p-3 shadow-md">
+                                <p className="text-sm font-medium text-gray-900">{payload[0].name}</p>
+                                <p className="text-sm" style={{ color: payload[0].color }}>
+                                  ${payload[0].value?.toLocaleString()}
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
                     </PieChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Expense Trends</h3>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ChartContainer config={chartConfig} className="h-[300px]">
                     <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="year" />
-                      <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`} />
-                      <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, '']} />
-                      <Bar dataKey="expenses" fill="#EF4444" name="Total Expenses" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
+                      <XAxis 
+                        dataKey="year" 
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip 
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="rounded-lg border bg-white p-3 shadow-md">
+                                <p className="text-sm font-medium text-gray-900">Year {label}</p>
+                                <p className="text-sm" style={{ color: payload[0].color }}>
+                                  Total Expenses: ${payload[0].value?.toLocaleString()}
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Bar 
+                        dataKey="expenses" 
+                        fill="var(--color-expenses)" 
+                        name="Total Expenses"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </div>
               </div>
             </CardContent>
@@ -812,29 +1026,113 @@ export default function FormaPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">NOI Trend</h3>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ChartContainer config={chartConfig} className="h-[300px]">
                     <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="year" />
-                      <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`} />
-                      <Tooltip formatter={(value) => [`$${value.toLocaleString()}`, '']} />
-                      <Line type="monotone" dataKey="noi" stroke="#3B82F6" strokeWidth={3} name="NOI" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
+                      <XAxis 
+                        dataKey="year" 
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip 
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="rounded-lg border bg-white p-3 shadow-md">
+                                <p className="text-sm font-medium text-gray-900">Year {label}</p>
+                                <p className="text-sm" style={{ color: payload[0].color }}>
+                                  NOI: ${payload[0].value?.toLocaleString()}
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="noi" 
+                        stroke="var(--color-noi)" 
+                        strokeWidth={3} 
+                        name="NOI"
+                        dot={{ fill: "var(--color-noi)", strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: "var(--color-noi)", strokeWidth: 2 }}
+                      />
                     </LineChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">RevPAR & Occupancy</h3>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ChartContainer config={chartConfig} className="h-[300px]">
                     <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="year" />
-                      <YAxis yAxisId="left" tickFormatter={(value) => `$${value}`} />
-                      <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => `${value}%`} />
-                      <Tooltip />
-                      <Line yAxisId="left" type="monotone" dataKey="revpar" stroke="#8B5CF6" strokeWidth={3} name="RevPAR ($)" />
-                      <Line yAxisId="right" type="monotone" dataKey="occupancy" stroke="#F59E0B" strokeWidth={3} name="Occupancy (%)" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
+                      <XAxis 
+                        dataKey="year" 
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        yAxisId="left" 
+                        tickFormatter={(value) => `$${value}`}
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        yAxisId="right" 
+                        orientation="right" 
+                        tickFormatter={(value) => `${value}%`}
+                        className="text-gray-600"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip 
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="rounded-lg border bg-white p-3 shadow-md">
+                                <p className="text-sm font-medium text-gray-900">Year {label}</p>
+                                {payload.map((entry, index) => (
+                                  <p key={index} className="text-sm" style={{ color: entry.color }}>
+                                    {entry.name}: {String(entry.name)?.includes('$') ? `$${entry.value}` : `${entry.value}%`}
+                                  </p>
+                                ))}
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Line 
+                        yAxisId="left" 
+                        type="monotone" 
+                        dataKey="revpar" 
+                        stroke="var(--color-revpar)" 
+                        strokeWidth={3} 
+                        name="RevPAR ($)"
+                        dot={{ fill: "var(--color-revpar)", strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: "var(--color-revpar)", strokeWidth: 2 }}
+                      />
+                      <Line 
+                        yAxisId="right" 
+                        type="monotone" 
+                        dataKey="occupancy" 
+                        stroke="var(--color-occupancy)" 
+                        strokeWidth={3} 
+                        name="Occupancy (%)"
+                        dot={{ fill: "var(--color-occupancy)", strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: "var(--color-occupancy)", strokeWidth: 2 }}
+                      />
                     </LineChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </div>
               </div>
             </CardContent>
@@ -957,10 +1255,10 @@ export default function FormaPage() {
 
         {/* Report Generation Modal */}
         {showReportModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">Generate Hotel Pro Forma Report</h2>
                   <button
                     onClick={() => setShowReportModal(false)}
@@ -970,117 +1268,163 @@ export default function FormaPage() {
                   </button>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex space-x-3 mb-6">
-                  <Button
-                    onClick={downloadPDF}
-                    className="flex-1 bg-black text-white hover:bg-gray-800"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download Report
-                  </Button>
-                  <Button
-                    onClick={() => setShowReportModal(false)}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                </div>
+                {!isGeneratingReport ? (
+                  <>
+                    {/* Action Buttons */}
+                    <div className="flex space-x-3 mb-6">
+                      <Button
+                        onClick={downloadPDF}
+                        className="flex-1 bg-black text-white hover:bg-gray-800"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download Report
+                      </Button>
+                      <Button
+                        onClick={() => setShowReportModal(false)}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
 
-                <div className="space-y-6">
-                  {/* Current Assumptions */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Current Assumptions</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Number of Rooms:</span>
-                        <span className="font-medium">{assumptions.numberOfRooms}</span>
+                    <div className="space-y-4">
+                      {/* Current Assumptions */}
+                      <div>
+                        <h3 className="text-base font-semibold text-gray-900 mb-2">Current Assumptions</h3>
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Rooms:</span>
+                              <span className="font-medium">{assumptions.numberOfRooms}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Occupancy:</span>
+                              <span className="font-medium">{assumptions.baseOccupancyRate}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Base ADR:</span>
+                              <span className="font-medium">${assumptions.baseADR}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">ADR Growth:</span>
+                              <span className="font-medium">{assumptions.adrGrowthRate}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Occupancy Growth:</span>
+                              <span className="font-medium">{assumptions.occupancyGrowthRate}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Expense Growth:</span>
+                              <span className="font-medium">{assumptions.expenseGrowthRate}%</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Base Occupancy Rate:</span>
-                        <span className="font-medium">{assumptions.baseOccupancyRate}%</span>
+
+                      {/* Key Metrics Summary */}
+                      <div>
+                        <h3 className="text-base font-semibold text-gray-900 mb-2">5-Year Projection Summary</h3>
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Revenue:</span>
+                              <span className="font-medium">${metrics[4]?.totalRevenue.toLocaleString() || '0'}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Expenses:</span>
+                              <span className="font-medium">${metrics[4]?.totalExpenses.toLocaleString() || '0'}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">NOI:</span>
+                              <span className={`font-medium ${metrics[4]?.noi && metrics[4].noi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                ${metrics[4]?.noi.toLocaleString() || '0'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Occupancy:</span>
+                              <span className="font-medium">{metrics[4]?.occupancy.toFixed(1) || '0'}%</span>
+                            </div>
+                            <div className="flex justify-between col-span-2">
+                              <span className="text-gray-600">RevPAR:</span>
+                              <span className="font-medium">${metrics[4]?.revpar.toFixed(0) || '0'}</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Base ADR:</span>
-                        <span className="font-medium">${assumptions.baseADR}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">ADR Growth Rate:</span>
-                        <span className="font-medium">{assumptions.adrGrowthRate}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Occupancy Growth Rate:</span>
-                        <span className="font-medium">{assumptions.occupancyGrowthRate}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Expense Growth Rate:</span>
-                        <span className="font-medium">{assumptions.expenseGrowthRate}%</span>
+
+                      {/* Report Contents */}
+                      <div>
+                        <h3 className="text-base font-semibold text-gray-900 mb-2">AI-Powered Report Contents</h3>
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="space-y-1 text-sm">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-600">•</span>
+                              <span className="text-gray-700">AI-generated executive summary</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-600">•</span>
+                              <span className="text-gray-700">Complete 5-year financial projections</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-600">•</span>
+                              <span className="text-gray-700">Professional financial analysis</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-600">•</span>
+                              <span className="text-gray-700">Risk assessment and recommendations</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-600">•</span>
+                              <span className="text-gray-700">Bridge-branded PDF format</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Key Metrics Summary */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">5-Year Projection Summary</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Year 5 Total Revenue:</span>
-                        <span className="font-medium">${metrics[4]?.totalRevenue.toLocaleString() || '0'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Year 5 Total Expenses:</span>
-                        <span className="font-medium">${metrics[4]?.totalExpenses.toLocaleString() || '0'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Year 5 NOI:</span>
-                        <span className={`font-medium ${metrics[4]?.noi && metrics[4].noi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${metrics[4]?.noi.toLocaleString() || '0'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Year 5 Occupancy:</span>
-                        <span className="font-medium">{metrics[4]?.occupancy.toFixed(1) || '0'}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Year 5 RevPAR:</span>
-                        <span className="font-medium">${metrics[4]?.revpar.toFixed(0) || '0'}</span>
-                      </div>
+                  </>
+                ) : (
+                  /* Professional Loading Content */
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Generating Your Report</h3>
+                      <p className="text-gray-600 text-sm">Please wait while we process your financial data</p>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {/* Completed Steps */}
+                      {completedSteps.map((step, index) => (
+                        <div key={index} className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                            <CheckCircle className="w-4 h-4 text-white" />
+                          </div>
+                          <span className="text-green-700 text-sm">{step}</span>
+                        </div>
+                      ))}
+                      
+                      {/* Current Step */}
+                      {loadingStep && (
+                        <div className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                          <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
+                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          </div>
+                          <span className="text-yellow-700 text-sm">{loadingStep}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="text-center">
+                      <p className="text-gray-500 text-xs">
+                        This may take a few moments to complete
+                      </p>
                     </div>
                   </div>
-
-                  {/* Report Contents */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">AI-Powered Report Contents</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-gray-700">AI-generated executive summary</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-gray-700">Complete 5-year financial projections</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-gray-700">Professional financial analysis</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-gray-700">Risk assessment and recommendations</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-gray-700">Bridge-branded PDF format</span>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
+                )}
               </div>
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

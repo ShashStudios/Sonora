@@ -3,8 +3,24 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 relative">
+      {/* Grid Background */}
+      <div className="absolute inset-0 bg-white">
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 20% 20%, transparent 0%, transparent 15%, rgba(0,0,0,0.03) 25%),
+              radial-gradient(circle at 80% 80%, transparent 0%, transparent 20%, rgba(0,0,0,0.02) 35%),
+              linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px)
+            `,
+            backgroundSize: '100% 100%, 100% 100%, 20px 20px, 20px 20px',
+            maskImage: 'radial-gradient(ellipse 120% 100% at 50% 0%, black 0%, black 40%, transparent 70%)'
+          }}
+        />
+      </div>
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start relative z-10">
         <Image
           src="/bridge.png"
           alt="Bridge logo"
@@ -52,7 +68,7 @@ export default function Home() {
           </a>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center relative z-10">
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"
           href="https://www.bridgemarketplace.com/lender-inquiries"
