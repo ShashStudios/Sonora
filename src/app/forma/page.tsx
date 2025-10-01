@@ -135,6 +135,13 @@ export default function FormaPage() {
     calculateMetrics();
   }, [assumptions, calculateMetrics]);
 
+  // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push('/sign-in');
+    }
+  }, [isLoaded, isSignedIn, router]);
+
   // Show loading state while checking authentication
   if (!isLoaded) {
     return (
@@ -146,13 +153,6 @@ export default function FormaPage() {
       </div>
     );
   }
-
-  // Redirect to sign-in if not authenticated
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      router.push('/sign-in');
-    }
-  }, [isLoaded, isSignedIn, router]);
 
   // Don't render anything if not signed in (will redirect)
   if (!isSignedIn) {
