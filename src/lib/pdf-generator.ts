@@ -148,7 +148,7 @@ export const generatePDFReport = async (reportData: ReportData, aiReport: string
   pdf.setFont('helvetica', 'normal');
   
   // Clean up AI report formatting
-  let cleanReport = aiReport
+  const cleanReport = aiReport
     .replace(/\*\*/g, '') // Remove bold markdown
     .replace(/\*/g, '') // Remove italic markdown
     .replace(/---/g, '') // Remove horizontal rules

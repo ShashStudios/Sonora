@@ -28,8 +28,8 @@ export default function LearnMorePage() {
           <h2 className="text-3xl font-bold text-gray-900 mb-6">What is a Hotel Pro Forma?</h2>
           <div className="bg-blue-50 border-l-4 border-blue-400 p-6 mb-6">
             <p className="text-lg text-gray-700 leading-relaxed">
-              A <strong>pro forma</strong> is a financial projection that estimates a hotel's future performance 
-              over a specific period. It's an essential tool for investors, lenders, and hotel operators to 
+              A <strong>pro forma</strong> is a financial projection that estimates a hotel&apos;s future performance 
+              over a specific period. It&apos;s an essential tool for investors, lenders, and hotel operators to 
               evaluate the financial viability and potential return on investment of a hotel property.
             </p>
           </div>
@@ -73,7 +73,7 @@ export default function LearnMorePage() {
                 <strong>Formula:</strong> ADR × Occupancy Rate
               </p>
               <p className="text-gray-600 mt-2">
-                <strong>Why it matters:</strong> RevPAR is the industry's key performance indicator, 
+                <strong>Why it matters:</strong> RevPAR is the industry&apos;s key performance indicator, 
                 combining both occupancy and rate performance into a single metric.
               </p>
             </div>
@@ -91,8 +91,8 @@ export default function LearnMorePage() {
                 <strong>Formula:</strong> Total Revenue - Operating Expenses
               </p>
               <p className="text-gray-600 mt-2">
-                <strong>Why it matters:</strong> NOI determines the property's ability to generate cash flow 
-                and service debt. It's the primary metric lenders use to evaluate loan capacity.
+                <strong>Why it matters:</strong> NOI determines the property&apos;s ability to generate cash flow 
+                and service debt. It&apos;s the primary metric lenders use to evaluate loan capacity.
               </p>
             </div>
 
@@ -122,7 +122,7 @@ export default function LearnMorePage() {
             <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Revenue Growth Chart</h3>
               <p className="text-gray-700 mb-3">
-                Shows how your hotel's total revenue is projected to grow over time, including:
+                Shows how your hotel&apos;s total revenue is projected to grow over time, including:
               </p>
               <ul className="list-disc list-inside text-gray-600 space-y-1">
                 <li>Room revenue from guest stays</li>
@@ -134,7 +134,7 @@ export default function LearnMorePage() {
             <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
               <h3 className="text-xl font-semibold text-gray-900 mb-3">NOI Trend Analysis</h3>
               <p className="text-gray-700 mb-3">
-                Tracks your hotel's profitability over the projection period, showing:
+                Tracks your hotel&apos;s profitability over the projection period, showing:
               </p>
               <ul className="list-disc list-inside text-gray-600 space-y-1">
                 <li>Net Operating Income growth patterns</li>

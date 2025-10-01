@@ -10,14 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { 
   Download, 
   TrendingUp, 
   DollarSign, 
   Users, 
-  BarChart3, 
   CheckCircle, 
   Info
 } from "lucide-react";
@@ -109,7 +108,6 @@ export default function FormaPage() {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const calculateMetrics = useCallback(() => {
     const newMetrics: FinancialMetrics[] = [];
@@ -271,7 +269,6 @@ export default function FormaPage() {
       // Show loading state in the same modal
       setIsGeneratingReport(true);
       setCompletedSteps([]);
-      setCurrentStepIndex(0);
       
       // Professional loading steps
       const steps = [
@@ -286,7 +283,6 @@ export default function FormaPage() {
       
       // Simulate step-by-step progress
       for (let i = 0; i < steps.length; i++) {
-        setCurrentStepIndex(i);
         setLoadingStep(steps[i]);
         await new Promise(resolve => setTimeout(resolve, 800));
         setCompletedSteps(prev => [...prev, steps[i]]);
@@ -341,7 +337,6 @@ export default function FormaPage() {
       setIsGeneratingReport(false);
       setLoadingStep('');
       setCompletedSteps([]);
-      setCurrentStepIndex(0);
       setShowReportModal(false);
     }
   };
