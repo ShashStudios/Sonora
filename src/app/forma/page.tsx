@@ -29,6 +29,7 @@ interface HotelAssumptions {
   adrGrowthRate: number;
   occupancyGrowthRate: number;
   expenseGrowthRate: number;
+  projectionYears: number;
 }
 
 interface ValidationErrors {
@@ -38,6 +39,7 @@ interface ValidationErrors {
   adrGrowthRate?: string;
   occupancyGrowthRate?: string;
   expenseGrowthRate?: string;
+  projectionYears?: string;
 }
 
 interface FinancialMetrics {
@@ -97,6 +99,7 @@ export default function FormaPage() {
     adrGrowthRate: 3,
     occupancyGrowthRate: 2,
     expenseGrowthRate: 2.5,
+    projectionYears: 5,
   });
 
   const [metrics, setMetrics] = useState<FinancialMetrics[]>([]);
@@ -111,7 +114,7 @@ export default function FormaPage() {
   const calculateMetrics = useCallback(() => {
     const newMetrics: FinancialMetrics[] = [];
     
-    for (let year = 1; year <= 5; year++) {
+    for (let year = 1; year <= assumptions.projectionYears; year++) {
       const occupancy = assumptions.baseOccupancyRate * Math.pow(1 + assumptions.occupancyGrowthRate / 100, year - 1);
       const adr = assumptions.baseADR * Math.pow(1 + assumptions.adrGrowthRate / 100, year - 1);
       const revpar = (occupancy / 100) * adr;
@@ -215,6 +218,11 @@ export default function FormaPage() {
         if (value < 0) return 'Cannot be negative';
         if (value > 50) return 'Maximum 50% allowed';
         break;
+      case 'projectionYears':
+        if (value < 3) return 'Minimum 3 years required';
+        if (value > 20) return 'Maximum 20 years allowed';
+        if (!Number.isInteger(value)) return 'Must be a whole number';
+        break;
     }
     return undefined;
   };
@@ -248,7 +256,8 @@ export default function FormaPage() {
       baseADR: 150,
       adrGrowthRate: 3,
       occupancyGrowthRate: 1,
-      expenseGrowthRate: 2.5
+      expenseGrowthRate: 2.5,
+      projectionYears: 5
     });
     setActiveTab('overview');
   };
@@ -293,11 +302,11 @@ export default function FormaPage() {
           assumptions,
           metrics,
           summary: {
-            totalRevenue: metrics[4]?.totalRevenue || 0,
-            totalExpenses: metrics[4]?.totalExpenses || 0,
-            noi: metrics[4]?.noi || 0,
-            occupancy: metrics[4]?.occupancy || 0,
-            revpar: metrics[4]?.revpar || 0
+            totalRevenue: metrics[metrics.length - 1]?.totalRevenue || 0,
+            totalExpenses: metrics[metrics.length - 1]?.totalExpenses || 0,
+            noi: metrics[metrics.length - 1]?.noi || 0,
+            occupancy: metrics[metrics.length - 1]?.occupancy || 0,
+            revpar: metrics[metrics.length - 1]?.revpar || 0
           }
         })
       });
@@ -374,11 +383,11 @@ export default function FormaPage() {
   }));
 
   const expenseData = metrics.length > 0 ? [
-    { name: 'Payroll', value: metrics[4].payroll },
-    { name: 'Utilities', value: metrics[4].utilities },
-    { name: 'Marketing', value: metrics[4].marketing },
-    { name: 'Maintenance', value: metrics[4].maintenance },
-    { name: 'Other', value: metrics[4].otherExpenses }
+    { name: 'Payroll', value: metrics[metrics.length - 1].payroll },
+    { name: 'Utilities', value: metrics[metrics.length - 1].utilities },
+    { name: 'Marketing', value: metrics[metrics.length - 1].marketing },
+    { name: 'Maintenance', value: metrics[metrics.length - 1].maintenance },
+    { name: 'Other', value: metrics[metrics.length - 1].otherExpenses }
   ] : [];
 
   return (
@@ -389,13 +398,13 @@ export default function FormaPage() {
           <div className="text-sm text-gray-500">
             <Link href="/" className="text-gray-600 hover:text-gray-700 hover:underline">Home</Link>
             <span className="mx-1">&gt;</span>
-            <Link href="/forma" className="text-gray-600 hover:text-gray-700 hover:underline">Pro Forma</Link>
+            <span className="text-gray-500">Pro Forma</span>
           </div>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Hotel Pro Forma Workspace</h1>
               <p className="text-gray-600 mt-1">
-                Input assumptions, run calculations, review metrics, and export financial reports.
+                Input assumptions, run calculations, review metrics, and export financial reports. Projection Years: {assumptions.projectionYears} years.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -404,8 +413,7 @@ export default function FormaPage() {
                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent animate-shimmer transform -skew-x-12"></div>
               </Button>
               <Button onClick={resetToDefaults} className="bg-black text-white hover:bg-gray-800">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                New pro forma
+                Reset
               </Button>
             </div>
           </div>
@@ -421,22 +429,22 @@ export default function FormaPage() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-gray-700">5-Year NOI</p>
+                    <p className="text-sm font-medium text-gray-700">{assumptions.projectionYears}-Year NOI</p>
                     <div className="group relative">
                       <Info className="h-3 w-3 text-gray-400 cursor-help" />
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-sm">
                         Net Operating Income: Revenue minus operating expenses
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                       </div>
                     </div>
                   </div>
                   <p className="text-xs text-gray-500">Net Operating Income</p>
-                  <p className={`text-2xl font-bold mt-1 ${metrics.length > 0 && metrics[4].noi < 0 ? 'text-red-600' : 'text-gray-900'}`}>
-                    ${metrics.length > 0 ? metrics[4].noi.toLocaleString() : '0'}
+                  <p className={`text-2xl font-bold mt-1 ${metrics.length > 0 && metrics[metrics.length - 1].noi < 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                    ${metrics.length > 0 ? metrics[metrics.length - 1].noi.toLocaleString() : '0'}
                   </p>
                   <p className="text-xs text-gray-500 flex items-center mt-1">
-                    <CheckCircle className={`h-3 w-3 mr-1 ${metrics.length > 0 && metrics[4].noi > 0 ? 'text-green-500' : 'text-red-500'}`} />
-                    {metrics.length > 0 && metrics[4].noi > 0 ? "Profitable" : "Loss"}
+                    <CheckCircle className={`h-3 w-3 mr-1 ${metrics.length > 0 && metrics[metrics.length - 1].noi > 0 ? 'text-green-500' : 'text-red-500'}`} />
+                    {metrics.length > 0 && metrics[metrics.length - 1].noi > 0 ? "Profitable" : "Loss"}
                   </p>
                 </div>
               </div>
@@ -451,10 +459,10 @@ export default function FormaPage() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-gray-700">Year 5 Revenue</p>
+                    <p className="text-sm font-medium text-gray-700">Year {assumptions.projectionYears} Revenue</p>
                     <div className="group relative">
                       <Info className="h-3 w-3 text-gray-400 cursor-help" />
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-sm">
                         Total money earned from rooms and other services
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                       </div>
@@ -462,10 +470,10 @@ export default function FormaPage() {
                   </div>
                   <p className="text-xs text-gray-500">Total annual revenue</p>
                   <p className="text-2xl font-bold text-gray-900 mt-1">
-                    ${metrics.length > 0 ? metrics[4].totalRevenue.toLocaleString() : '0'}
+                    ${metrics.length > 0 ? metrics[metrics.length - 1].totalRevenue.toLocaleString() : '0'}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {metrics.length > 0 ? ((metrics[4].totalRevenue / metrics[0].totalRevenue - 1) * 100).toFixed(1) : '0'}% growth
+                    {metrics.length > 0 ? ((metrics[metrics.length - 1].totalRevenue / metrics[0].totalRevenue - 1) * 100).toFixed(1) : '0'}% growth
                   </p>
                 </div>
               </div>
@@ -480,10 +488,10 @@ export default function FormaPage() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-gray-700">Year 5 RevPAR</p>
+                    <p className="text-sm font-medium text-gray-700">Year {assumptions.projectionYears} RevPAR</p>
                     <div className="group relative">
                       <Info className="h-3 w-3 text-gray-400 cursor-help" />
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-sm">
                         Revenue Per Available Room: How much each room earns on average
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                       </div>
@@ -491,10 +499,10 @@ export default function FormaPage() {
                   </div>
                   <p className="text-xs text-gray-500">Revenue per available room</p>
                   <p className="text-2xl font-bold text-gray-900 mt-1">
-                    ${metrics.length > 0 ? metrics[4].revpar.toFixed(0) : '0'}
+                    ${metrics.length > 0 ? metrics[metrics.length - 1].revpar.toFixed(0) : '0'}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {metrics.length > 0 ? ((metrics[4].revpar / metrics[0].revpar - 1) * 100).toFixed(1) : '0'}% growth
+                    {metrics.length > 0 ? ((metrics[metrics.length - 1].revpar / metrics[0].revpar - 1) * 100).toFixed(1) : '0'}% growth
                   </p>
                 </div>
               </div>
@@ -509,10 +517,10 @@ export default function FormaPage() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-gray-700">Year 5 Occupancy</p>
+                    <p className="text-sm font-medium text-gray-700">Year {assumptions.projectionYears} Occupancy</p>
                     <div className="group relative">
                       <Info className="h-3 w-3 text-gray-400 cursor-help" />
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-sm">
                         Percentage of rooms that are occupied by guests
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                       </div>
@@ -520,10 +528,10 @@ export default function FormaPage() {
                   </div>
                   <p className="text-xs text-gray-500">Average occupancy rate</p>
                   <p className="text-2xl font-bold text-gray-900 mt-1">
-                    {metrics.length > 0 ? metrics[4].occupancy.toFixed(1) : '0'}%
+                    {metrics.length > 0 ? metrics[metrics.length - 1].occupancy.toFixed(1) : '0'}%
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {assumptions.numberOfRooms} rooms • {metrics.length > 0 ? metrics[4].occupiedRooms.toFixed(0) : '0'} occupied
+                    {assumptions.numberOfRooms} rooms • {metrics.length > 0 ? metrics[metrics.length - 1].occupiedRooms.toFixed(0) : '0'} occupied
                   </p>
                 </div>
               </div>
@@ -532,14 +540,42 @@ export default function FormaPage() {
         </div>
 
         {/* Hotel Assumptions Panel - Always Visible */}
-        <Card className="bg-white border border-gray-200 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-gray-900">Hotel Assumptions</CardTitle>
-            <CardDescription className="text-sm text-gray-500">
-              Adjust these parameters to model your hotel&apos;s financial performance
-            </CardDescription>
-          </CardHeader>
+          <Card className="bg-white border border-gray-200 shadow-sm">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-xl font-semibold text-gray-900">Hotel Assumptions</CardTitle>
+                <span className="px-2 py-1 text-xs font-medium text-white bg-red-500 rounded-full">
+                  INPUT
+                </span>
+              </div>
+              <CardDescription className="text-sm text-gray-500">
+                Adjust these parameters to model your hotel&apos;s financial performance.
+              </CardDescription>
+            </CardHeader>
           <CardContent className="space-y-6">
+            {/* Projection Years - Compact Row */}
+            <div className="space-y-3">
+              <Label htmlFor="projectionYears" className="text-sm font-semibold text-gray-700">
+                Projection Years (5 years is Standard)
+                {validationErrors.projectionYears && (
+                  <span className="text-red-500 text-xs ml-2">({validationErrors.projectionYears})</span>
+                )}
+              </Label>
+              <div className="w-fit">
+                <Input
+                  id="projectionYears"
+                  type="number"
+                  value={assumptions.projectionYears}
+                  onChange={(e) => handleInputChange('projectionYears', parseInt(e.target.value) || 3)}
+                  className={`bg-gray-50 border-gray-200 w-32 ${validationErrors.projectionYears ? 'border-red-300' : ''}`}
+                  placeholder="Enter years"
+                  min="3"
+                  max="20"
+                  step="1"
+                />
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Number of Rooms */}
               <div className="space-y-3">
@@ -604,26 +640,25 @@ export default function FormaPage() {
                 </div>
               </div>
 
-              {/* ADR Growth Rate */}
+              {/* Expense Growth Rate */}
               <div className="space-y-3">
-                <Label htmlFor="adrGrowth" className="text-sm font-semibold text-gray-700">
-                  ADR Growth Rate (%): {assumptions.adrGrowthRate}%
-                  {validationErrors.adrGrowthRate && (
-                    <span className="text-red-500 text-xs ml-2">({validationErrors.adrGrowthRate})</span>
+                <Label htmlFor="expenseGrowth" className="text-sm font-semibold text-gray-700">
+                  Expense Growth Rate (%)
+                  {validationErrors.expenseGrowthRate && (
+                    <span className="text-red-500 text-xs ml-2">({validationErrors.expenseGrowthRate})</span>
                   )}
                 </Label>
-                <Slider
-                  value={[assumptions.adrGrowthRate]}
-                  onValueChange={(value) => handleInputChange('adrGrowthRate', value[0])}
-                  max={20}
-                  min={-10}
-                  step={0.1}
-                  className="w-full"
+                <Input
+                  id="expenseGrowth"
+                  type="number"
+                  value={assumptions.expenseGrowthRate}
+                  onChange={handleExpenseGrowthChange}
+                  className={`bg-gray-50 border-gray-200 ${validationErrors.expenseGrowthRate ? 'border-red-300' : ''}`}
+                  placeholder="Enter expense growth rate"
+                  min="0"
+                  max="50"
+                  step="0.1"
                 />
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>-10%</span>
-                  <span>20%</span>
-                </div>
               </div>
 
               {/* Occupancy Growth Rate */}
@@ -648,72 +683,81 @@ export default function FormaPage() {
                 </div>
               </div>
 
-              {/* Expense Growth Rate */}
+              {/* ADR Growth Rate */}
               <div className="space-y-3">
-                <Label htmlFor="expenseGrowth" className="text-sm font-semibold text-gray-700">
-                  Expense Growth Rate (%)
-                  {validationErrors.expenseGrowthRate && (
-                    <span className="text-red-500 text-xs ml-2">({validationErrors.expenseGrowthRate})</span>
+                <Label htmlFor="adrGrowth" className="text-sm font-semibold text-gray-700">
+                  ADR Growth Rate (%): {assumptions.adrGrowthRate}%
+                  {validationErrors.adrGrowthRate && (
+                    <span className="text-red-500 text-xs ml-2">({validationErrors.adrGrowthRate})</span>
                   )}
                 </Label>
-                <Input
-                  id="expenseGrowth"
-                  type="number"
-                  value={assumptions.expenseGrowthRate}
-                  onChange={handleExpenseGrowthChange}
-                  className={`bg-gray-50 border-gray-200 ${validationErrors.expenseGrowthRate ? 'border-red-300' : ''}`}
-                  placeholder="Enter expense growth rate"
-                  min="0"
-                  max="50"
-                  step="0.1"
+                <Slider
+                  value={[assumptions.adrGrowthRate]}
+                  onValueChange={(value) => handleInputChange('adrGrowthRate', value[0])}
+                  max={20}
+                  min={-10}
+                  step={0.1}
+                  className="w-full"
                 />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>-10%</span>
+                  <span>20%</span>
+                </div>
               </div>
+
             </div>
           </CardContent>
         </Card>
 
         {/* Navigation Tabs */}
-        <div className="flex space-x-2 bg-gray-100 p-2 rounded-lg w-fit">
-          <button 
-            onClick={() => setActiveTab('overview')}
-            className={`px-6 py-2 font-medium rounded-md shadow-sm transition-colors ${
-              activeTab === 'overview' 
-                ? 'bg-white text-gray-900' 
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Overview
-          </button>
-          <button 
-            onClick={() => setActiveTab('revenue')}
-            className={`px-6 py-2 font-medium rounded-md shadow-sm transition-colors ${
-              activeTab === 'revenue' 
-                ? 'bg-white text-gray-900' 
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Revenue
-          </button>
-          <button 
-            onClick={() => setActiveTab('expenses')}
-            className={`px-6 py-2 font-medium rounded-md shadow-sm transition-colors ${
-              activeTab === 'expenses' 
-                ? 'bg-white text-gray-900' 
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Expenses
-          </button>
-          <button 
-            onClick={() => setActiveTab('profitability')}
-            className={`px-6 py-2 font-medium rounded-md shadow-sm transition-colors ${
-              activeTab === 'profitability' 
-                ? 'bg-white text-gray-900' 
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Profitability
-          </button>
+        <div className="flex items-center justify-between">
+          <div className="flex space-x-2 bg-gray-100 p-2 rounded-lg w-fit">
+            <button 
+              onClick={() => setActiveTab('overview')}
+              className={`px-6 py-2 font-medium rounded-md shadow-sm transition-colors ${
+                activeTab === 'overview' 
+                  ? 'bg-white text-gray-900' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Overview
+            </button>
+            <button 
+              onClick={() => setActiveTab('revenue')}
+              className={`px-6 py-2 font-medium rounded-md shadow-sm transition-colors ${
+                activeTab === 'revenue' 
+                  ? 'bg-white text-gray-900' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Revenue
+            </button>
+            <button 
+              onClick={() => setActiveTab('expenses')}
+              className={`px-6 py-2 font-medium rounded-md shadow-sm transition-colors ${
+                activeTab === 'expenses' 
+                  ? 'bg-white text-gray-900' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Expenses
+            </button>
+            <button 
+              onClick={() => setActiveTab('profitability')}
+              className={`px-6 py-2 font-medium rounded-md shadow-sm transition-colors ${
+                activeTab === 'profitability' 
+                  ? 'bg-white text-gray-900' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Profitability
+            </button>
+          </div>
+          
+          <Button onClick={exportToCSV} className="bg-black text-white hover:bg-gray-800">
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
         </div>
 
         {/* Tab Content - Charts and Graphs */}
@@ -728,7 +772,15 @@ export default function FormaPage() {
             <CardContent>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue vs Expenses Trend</h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Revenue vs Expenses Trend</h3>
+                    <div className="group relative">
+                      <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-sm">
+                        X-axis: Years 1-{assumptions.projectionYears}, Y-axis: Revenue and Expenses in dollars. Shows the relationship between total revenue and total operating expenses over the {assumptions.projectionYears}-year projection period.
+                      </div>
+                    </div>
+                  </div>
                   <ChartContainer config={chartConfig} className="h-[300px]">
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
@@ -783,7 +835,15 @@ export default function FormaPage() {
                   </ChartContainer>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">NOI Trend</h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">NOI Trend</h3>
+                    <div className="group relative">
+                      <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-sm">
+                        X-axis: Years 1-{assumptions.projectionYears}, Y-axis: NOI in dollars. Shows the Net Operating Income trend over the {assumptions.projectionYears}-year projection period, indicating profitability changes.
+                      </div>
+                    </div>
+                  </div>
                   <ChartContainer config={chartConfig} className="h-[300px]">
                     <BarChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
@@ -839,13 +899,21 @@ export default function FormaPage() {
             <CardContent>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Composition</h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Revenue Composition</h3>
+                    <div className="group relative">
+                      <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-sm">
+                        Pie chart showing the breakdown of total revenue into Rooms Revenue and Other Revenue for Year {assumptions.projectionYears}, displaying the percentage contribution of each revenue stream.
+                      </div>
+                    </div>
+                  </div>
                   <ChartContainer config={chartConfig} className="h-[300px]">
                     <PieChart>
                       <Pie
                         data={[
-                          { name: 'Rooms Revenue', value: metrics.length > 0 ? metrics[4].roomsRevenue : 0 },
-                          { name: 'Other Revenue', value: metrics.length > 0 ? metrics[4].otherRevenue : 0 }
+                          { name: 'Rooms Revenue', value: metrics.length > 0 ? metrics[metrics.length - 1].roomsRevenue : 0 },
+                          { name: 'Other Revenue', value: metrics.length > 0 ? metrics[metrics.length - 1].otherRevenue : 0 }
                         ]}
                         cx="50%"
                         cy="50%"
@@ -877,7 +945,15 @@ export default function FormaPage() {
                   </ChartContainer>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Growth</h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Revenue Growth</h3>
+                    <div className="group relative">
+                      <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-sm">
+                        X-axis: Years 1-{assumptions.projectionYears}, Y-axis: Total Revenue in dollars. Shows the year-over-year growth of total revenue over the {assumptions.projectionYears}-year projection period.
+                      </div>
+                    </div>
+                  </div>
                   <ChartContainer config={chartConfig} className="h-[300px]">
                     <BarChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
@@ -933,7 +1009,15 @@ export default function FormaPage() {
             <CardContent>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Expense Breakdown</h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Expense Breakdown</h3>
+                    <div className="group relative">
+                      <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-sm">
+                        Pie chart showing the breakdown of total expenses into Payroll, Utilities, Marketing, Maintenance, and Other Expenses for Year {assumptions.projectionYears}, displaying the percentage contribution of each expense category.
+                      </div>
+                    </div>
+                  </div>
                   <ChartContainer config={chartConfig} className="h-[300px]">
                     <PieChart>
                       <Pie
@@ -969,7 +1053,15 @@ export default function FormaPage() {
                   </ChartContainer>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Expense Trends</h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Expense Trends</h3>
+                    <div className="group relative">
+                      <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-sm">
+                        X-axis: Years 1-{assumptions.projectionYears}, Y-axis: Total Expenses in dollars. Shows the year-over-year growth of total operating expenses over the {assumptions.projectionYears}-year projection period.
+                      </div>
+                    </div>
+                  </div>
                   <ChartContainer config={chartConfig} className="h-[300px]">
                     <BarChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
@@ -1025,7 +1117,15 @@ export default function FormaPage() {
             <CardContent>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">NOI Trend</h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">NOI Trend</h3>
+                    <div className="group relative">
+                      <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-sm">
+                        X-axis: Years 1-{assumptions.projectionYears}, Y-axis: NOI in dollars. Shows the Net Operating Income trend over the {assumptions.projectionYears}-year projection period, indicating profitability changes and margin compression.
+                      </div>
+                    </div>
+                  </div>
                   <ChartContainer config={chartConfig} className="h-[300px]">
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
@@ -1069,7 +1169,15 @@ export default function FormaPage() {
                   </ChartContainer>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">RevPAR & Occupancy</h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">RevPAR & Occupancy</h3>
+                    <div className="group relative">
+                      <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-sm">
+                        X-axis: Years 1-{assumptions.projectionYears}, Y-axis: RevPAR in dollars and Occupancy as percentage. Shows the relationship between Revenue per Available Room and Occupancy Rate over the {assumptions.projectionYears}-year projection period.
+                      </div>
+                    </div>
+                  </div>
                   <ChartContainer config={chartConfig} className="h-[300px]">
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
@@ -1150,18 +1258,12 @@ export default function FormaPage() {
                 {activeTab === 'profitability' && 'Net Operating Income (NOI)'}
               </CardTitle>
               <CardDescription className="text-sm text-gray-500">
-                {activeTab === 'overview' && 'Core performance indicators across 5-year projection'}
-                {activeTab === 'revenue' && 'Revenue breakdown by category across 5-year projection'}
-                {activeTab === 'expenses' && 'Detailed expense breakdown across 5-year projection'}
-                {activeTab === 'profitability' && 'Profitability analysis with NOI margin across 5-year projection'}
+                {activeTab === 'overview' && `Core performance indicators across ${assumptions.projectionYears}-year projection`}
+                {activeTab === 'revenue' && `Revenue breakdown by category across ${assumptions.projectionYears}-year projection`}
+                {activeTab === 'expenses' && `Detailed expense breakdown across ${assumptions.projectionYears}-year projection`}
+                {activeTab === 'profitability' && `Profitability analysis with NOI margin across ${assumptions.projectionYears}-year projection`}
               </CardDescription>
             </div>
-            {activeTab === 'profitability' && (
-              <Button onClick={exportToCSV} className="bg-black text-white hover:bg-gray-800">
-                <Download className="h-4 w-4 mr-2" />
-                Export CSV
-              </Button>
-            )}
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -1324,31 +1426,31 @@ export default function FormaPage() {
 
                       {/* Key Metrics Summary */}
                       <div>
-                        <h3 className="text-base font-semibold text-gray-900 mb-2">5-Year Projection Summary</h3>
+                        <h3 className="text-base font-semibold text-gray-900 mb-2">{assumptions.projectionYears}-Year Projection Summary</h3>
                         <div className="bg-gray-50 p-3 rounded-lg">
                           <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Revenue:</span>
-                              <span className="font-medium">${metrics[4]?.totalRevenue.toLocaleString() || '0'}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Expenses:</span>
-                              <span className="font-medium">${metrics[4]?.totalExpenses.toLocaleString() || '0'}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">NOI:</span>
-                              <span className={`font-medium ${metrics[4]?.noi && metrics[4].noi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                ${metrics[4]?.noi.toLocaleString() || '0'}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Occupancy:</span>
-                              <span className="font-medium">{metrics[4]?.occupancy.toFixed(1) || '0'}%</span>
-                            </div>
-                            <div className="flex justify-between col-span-2">
-                              <span className="text-gray-600">RevPAR:</span>
-                              <span className="font-medium">${metrics[4]?.revpar.toFixed(0) || '0'}</span>
-                            </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Revenue:</span>
+                          <span className="font-medium">${metrics[metrics.length - 1]?.totalRevenue.toLocaleString() || '0'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Expenses:</span>
+                          <span className="font-medium">${metrics[metrics.length - 1]?.totalExpenses.toLocaleString() || '0'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">NOI:</span>
+                          <span className={`font-medium ${metrics[metrics.length - 1]?.noi && metrics[metrics.length - 1].noi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            ${metrics[metrics.length - 1]?.noi.toLocaleString() || '0'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Occupancy:</span>
+                          <span className="font-medium">{metrics[metrics.length - 1]?.occupancy.toFixed(1) || '0'}%</span>
+                        </div>
+                        <div className="flex justify-between col-span-2">
+                          <span className="text-gray-600">RevPAR:</span>
+                          <span className="font-medium">${metrics[metrics.length - 1]?.revpar.toFixed(0) || '0'}</span>
+                        </div>
                           </div>
                         </div>
                       </div>
