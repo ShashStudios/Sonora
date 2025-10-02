@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { SignedIn, UserButton } from "@clerk/nextjs";
 
 export default function Home() {
   return (
@@ -22,11 +23,17 @@ export default function Home() {
       </div>
 
       {/* Floating Navigation Bar */}
-      <nav className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20 bg-white rounded-full px-6 py-3 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-8">
+      <nav className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20 bg-white rounded-full px-8 py-3 shadow-lg border border-gray-100 w-[90%] max-w-6xl">
+        <div className="flex items-center justify-between w-full">
           {/* Logo */}
           <div className="flex items-center">
-            <span className="text-xl font-bold text-black tracking-tight">BRISK</span>
+            <Image
+              src="/b.png"
+              alt="B logo"
+              width={120}
+              height={32}
+              priority
+            />
           </div>
 
           {/* Navigation Links */}
@@ -42,29 +49,29 @@ export default function Home() {
           </div>
 
           {/* Get Started Button */}
-          <button className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto">
+          <Link
+            href="/forma"
+            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+          >
             Get Started
-          </button>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7V17" />
+            </svg>
+          </Link>
         </div>
       </nav>
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start relative z-10">
-        <Image
-          src="/bridge.png"
-          alt="Bridge logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <p className="text-gray-600 text-sm font-medium text-center sm:text-left">
-          Client Portal for Hotel Pro Forma Evaluations
-        </p>
-        <div className="font-mono text-sm/6 text-center sm:text-left">
-          <p className="mb-2 tracking-[-.01em]">&gt; Build professional hotel financial projections</p>
-          <p className="mb-2 tracking-[-.01em]">&gt; Real-time calculations and visualizations</p>
-          <p className="tracking-[-.01em]">&gt; Export comprehensive reports instantly</p>
-        </div>
+      <main className="flex flex-col gap-[32px] row-start-2 items-center justify-center relative z-10">
+        {/* Main Headline */}
+        <h1 className="text-5xl md:text-6xl font-bold text-black text-center max-w-4xl mt-32 whitespace-nowrap">
+          The First AI Native Marketplace
+        </h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
+        {/* Sub-headline */}
+        <p className="text-xl text-black text-center mb-6 max-w-2xl -mt-8">
+          Connect with AI services, tools, and solutions in one unified platform. Discover, compare, and deploy AI solutions effortlessly.
+        </p>
+
+        <div className="flex gap-4 items-center flex-col sm:flex-row justify-center">
           <Link
             className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
             href="/forma"
@@ -83,14 +90,28 @@ export default function Home() {
                 d="M7 17L17 7M17 7H7M17 7V17"
               />
             </svg>
-            Get started
+            Start Shopping
           </Link>
-              <Link
-                className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-                href="/learn-more"
-              >
-                Learn more
-              </Link>
+          <Link
+            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-[#7ed957] text-black gap-2 hover:bg-[#6bc84a] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+            href="/learn-more"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+              />
+            </svg>
+            Become a Seller
+          </Link>
         </div>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center relative z-10">
