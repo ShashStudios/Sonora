@@ -14,8 +14,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bridge Forma",
-  description: "Hotel Pro Forma Builder - Professional financial projections for hotel investments",
+  title: {
+    default: "Bands",
+    template: "%s | Bands",
+  },
+  description: "Bands",
+  icons: {
+    icon: "/topPageLogoB.png",
+    apple: "/topPageLogoB.png",
+  },
 };
 
 export default function RootLayout({
