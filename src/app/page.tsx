@@ -20,6 +20,33 @@ export default function Home() {
           }}
         />
       </div>
+
+      {/* Floating Navigation Bar */}
+      <nav className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20 bg-white rounded-full px-6 py-3 shadow-lg border border-gray-100">
+        <div className="flex items-center gap-8">
+          {/* Logo */}
+          <div className="flex items-center">
+            <span className="text-xl font-bold text-black tracking-tight">BRISK</span>
+          </div>
+
+          {/* Navigation Links */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-1 text-gray-500 hover:text-gray-700 cursor-pointer">
+              <span>Blog</span>
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+            <Link href="/pricing" className="text-gray-500 hover:text-gray-700">Pricing</Link>
+            <Link href="/mission" className="text-gray-500 hover:text-gray-700">Our Mission</Link>
+          </div>
+
+          {/* Get Started Button */}
+          <button className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto">
+            Get Started
+          </button>
+        </div>
+      </nav>
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start relative z-10">
         <Image
           src="/bridge.png"
