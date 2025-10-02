@@ -15,13 +15,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Bands",
-    template: "%s | Bands",
+    default: "BANDS",
+    template: "%s | BANDS",
   },
-  description: "Bands",
+  description: "BANDS",
   icons: {
-    icon: "/topPageLogoB.png",
-    apple: "/topPageLogoB.png",
+    icon: "/file%20copy.svg",
+    apple: "/file%20copy.svg",
   },
 };
 
