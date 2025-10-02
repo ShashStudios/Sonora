@@ -68,7 +68,7 @@ export default function Home() {
 
         {/* Sub-headline */}
         <p className="text-xl text-black text-center mb-6 max-w-2xl -mt-8">
-          Connect with AI services, tools, and solutions in one unified platform. Discover, compare, and deploy AI solutions effortlessly.
+          Powering the AI economy by connecting creators, developers, and businesses. All in one place.
         </p>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row justify-center">

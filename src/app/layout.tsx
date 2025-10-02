@@ -20,8 +20,8 @@ export const metadata: Metadata = {
   },
   description: "BANDS",
   icons: {
-    icon: "/file%20copy.svg",
-    apple: "/file%20copy.svg",
+    icon: "/icon.svg",
+    apple: "/icon.svg",
   },
 };
 
