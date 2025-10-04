@@ -49,82 +49,95 @@ export default function PricingPage() {
         </p>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          {/* Free */}
-          <div className="rounded-2xl border border-gray-200 p-8 bg-white shadow-sm">
-            <h3 className="text-xl font-semibold">Free</h3>
-            <div className="mt-2 text-4xl font-bold">{billing === "yearly" ? prices.free.yearly : prices.free.monthly}
-              <span className="text-sm font-normal text-gray-500"> USD/month</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+          {/* Basic (Most Popular) */}
+          <div className="relative rounded-2xl border-2 border-[#7ed957] p-8 pt-16 bg-white shadow-md">
+            <div className="absolute top-0 left-0 right-0 h-10 rounded-t-2xl bg-[#7ed957] flex items-center justify-center text-black text-sm md:text-base font-bold">
+              $1/month for first 3 months
             </div>
-            <ul className="mt-6 space-y-3 text-sm text-gray-700">
-              <li className="flex items-start gap-2"><CheckIcon /> Limited browsing of AI vendors</li>
-              <li className="flex items-start gap-2"><CheckIcon /> Basic comparisons</li>
-              <li className="flex items-start gap-2"><CheckIcon /> Save up to 3 products</li>
-              <li className="flex items-start gap-2"><CheckIcon /> Email updates for new listings</li>
-            </ul>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-2xl font-semibold">Basic</h3>
+                <p className="text-gray-600 text-sm">For solo entrepreneurs</p>
+              </div>
+              <span className="text-xs bg-[#7ed957] text-black px-3 py-1 rounded-full">Most Popular</span>
+            </div>
+            <div className="mt-4">
+              <p className="text-sm text-gray-600">Starting at</p>
+              <div className="text-5xl font-bold">$29<span className="text-base align-top ml-1">USD</span><span className="text-base font-normal">/month</span></div>
+              <p className="text-gray-500 text-sm mt-1">billed once yearly</p>
+              <p className="text-gray-600 text-sm mt-1">Yearly subscription price $29 USD per month</p>
+            </div>
+            <hr className="my-5 border-gray-200" />
+            <div>
+              <h4 className="font-semibold text-gray-900">Card rates starting at</h4>
+              <ul className="mt-3 space-y-2 text-sm text-gray-700">
+                <li className="flex items-start gap-2"><CheckIcon /> 2.9% + 30¢ USD online</li>
+                <li className="flex items-start gap-2"><CheckIcon /> 2.6% + 10¢ USD in person</li>
+                <li className="flex items-start gap-2"><CheckIcon /> 2% 3rd-party payment providers</li>
+              </ul>
+            </div>
+            <hr className="my-5 border-gray-200" />
+            <div>
+              <h4 className="font-semibold text-gray-900">Standout features</h4>
+              <ul className="mt-3 space-y-2 text-sm text-gray-700">
+                <li className="flex items-start gap-2"><CheckIcon /> Up to 77% shipping discount</li>
+                <li className="flex items-start gap-2"><CheckIcon /> 10 inventory locations</li>
+                <li className="flex items-start gap-2"><CheckIcon /> 24/7 chat support</li>
+                <li className="flex items-start gap-2"><CheckIcon /> In-person selling by phone or POS device</li>
+              </ul>
+            </div>
             <div className="mt-8">
               <Link
                 href="/market"
-                className="rounded-full border border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-11 px-6"
+                className="rounded-full border border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-11 px-6 w-full"
               >
-                Get Started
+                Try for free
               </Link>
             </div>
           </div>
 
-          {/* Explorer - Most Popular */}
-          <div className="relative rounded-2xl border-2 border-gray-300 p-8 bg-white shadow-md">
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs bg-gray-900 text-white px-3 py-1 rounded-full">
-              Most Popular
-            </span>
-            <h3 className="text-xl font-semibold">Explorer</h3>
-            <div className="mt-2 text-4xl font-bold">{billing === "yearly" ? prices.explorer.yearly : prices.explorer.monthly}
-              <span className="text-sm font-normal text-gray-500"> USD/month</span>
+          {/* Grow */}
+          <div className="relative rounded-2xl border border-gray-200 p-8 pt-16 bg-white shadow-sm">
+            <div className="absolute top-0 left-0 right-0 h-10 rounded-t-2xl bg-[#7ed957] flex items-center justify-center text-black text-sm md:text-base font-bold">
+              $1/month for first 3 months
             </div>
-            <div className="mt-3 text-xs bg-gray-100 text-gray-700 rounded-lg px-3 py-2">
-              <span className="mr-1">🎓</span>
-              Students with their education email get an extra 20% off all plans!
+            <div>
+              <h3 className="text-2xl font-semibold">Grow</h3>
+              <p className="text-gray-600 text-sm">For small teams</p>
             </div>
-            <ul className="mt-6 space-y-3 text-sm text-gray-700">
-              <li className="flex items-start gap-2"><CheckIcon /> Unlimited vendor browsing</li>
-              <li className="flex items-start gap-2"><CheckIcon /> Unlimited comparisons</li>
-              <li className="flex items-start gap-2"><CheckIcon /> Shortlist management</li>
-              <li className="flex items-start gap-2"><CheckIcon /> Export vendor lists</li>
-              <li className="flex items-start gap-2"><CheckIcon /> Early access to new AI categories</li>
-            </ul>
+            <div className="mt-4">
+              <p className="text-sm text-gray-600">Starting at</p>
+              <div className="text-5xl font-bold">$79<span className="text-base align-top ml-1">USD</span><span className="text-base font-normal">/month</span></div>
+              <p className="text-gray-500 text-sm mt-1">billed once yearly</p>
+              <p className="text-gray-600 text-sm mt-1">Yearly subscription price $79 USD per month</p>
+            </div>
+            <hr className="my-5 border-gray-200" />
+            <div>
+              <h4 className="font-semibold text-gray-900">Card rates starting at</h4>
+              <ul className="mt-3 space-y-2 text-sm text-gray-700">
+                <li className="flex items-start gap-2"><CheckIcon /> 2.7% + 30¢ USD online</li>
+                <li className="flex items-start gap-2"><CheckIcon /> 2.5% + 10¢ USD in person</li>
+                <li className="flex items-start gap-2"><CheckIcon /> 1% 3rd-party payment providers</li>
+              </ul>
+            </div>
+            <hr className="my-5 border-gray-200" />
+            <div>
+              <h4 className="font-semibold text-gray-900">Standout features</h4>
+              <ul className="mt-3 space-y-2 text-sm text-gray-700">
+                <li className="flex items-start gap-2"><CheckIcon /> Up to 88% shipping discount and insurance</li>
+                <li className="flex items-start gap-2"><CheckIcon /> 10 inventory locations</li>
+                <li className="flex items-start gap-2"><CheckIcon /> 24/7 chat support</li>
+                <li className="flex items-start gap-2"><CheckIcon /> 5 staff accounts</li>
+                <li className="flex items-start gap-2"><CheckIcon /> In-person selling by phone or POS device</li>
+              </ul>
+            </div>
             <div className="mt-8">
               <Link
                 href="/market"
-                className="rounded-full border border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-11 px-6"
+                className="rounded-full border border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-11 px-6 w-full"
               >
-                Get Explorer
-              </Link>
-            </div>
-          </div>
-
-          {/* Scholar */}
-          <div className="rounded-2xl border border-gray-200 p-8 bg-white shadow-sm">
-            <h3 className="text-xl font-semibold">Scholar</h3>
-            <div className="mt-2 text-4xl font-bold">{billing === "yearly" ? prices.scholar.yearly : prices.scholar.monthly}
-              <span className="text-sm font-normal text-gray-500"> USD/month</span>
-            </div>
-            <div className="mt-3 text-xs bg-gray-100 text-gray-700 rounded-lg px-3 py-2">
-              <span className="mr-1">🎓</span>
-              Students with their education email get an extra 20% off all plans!
-            </div>
-            <ul className="mt-6 space-y-3 text-sm text-gray-700">
-              <li className="flex items-start gap-2"><CheckIcon /> Everything in Explorer</li>
-              <li className="flex items-start gap-2"><CheckIcon /> Priority vendor support</li>
-              <li className="flex items-start gap-2"><CheckIcon /> Unlimited exports</li>
-              <li className="flex items-start gap-2"><CheckIcon /> Team seats & collaboration</li>
-              <li className="flex items-start gap-2"><CheckIcon /> Version history of shortlists</li>
-            </ul>
-            <div className="mt-8">
-              <Link
-                href="/market"
-                className="rounded-full border border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm h-11 px-6"
-              >
-                Get Scholar
+                Try for free
               </Link>
             </div>
           </div>

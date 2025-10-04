@@ -194,7 +194,7 @@ export default function FormaPage() {
     <div className="min-h-screen flex items-center justify-center bg-white p-12">
       <div className="text-center">
         <h1 className="text-5xl md:text-6xl font-bold text-black tracking-tight">Coming Soon</h1>
-        <p className="mt-4 text-gray-600 max-w-xl mx-auto">We&apos;re building the first AI-native marketplace experience here. Check back shortly.</p>
+        <p className="mt-4 text-gray-600 max-w-xl mx-auto">We&apos;re building the first AI-native marketplace experience here.</p>
       </div>
     </div>
   );
