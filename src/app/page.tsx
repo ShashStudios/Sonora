@@ -38,14 +38,6 @@ export default function Home() {
 
           {/* Navigation Links */}
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-1 text-gray-500 hover:text-gray-700 cursor-pointer">
-              <span>Blog</span>
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-            <Link href="/pricing" className="text-gray-500 hover:text-gray-700">Pricing</Link>
-            <Link href="/mission" className="text-gray-500 hover:text-gray-700">Our Mission</Link>
           </div>
 
           {/* Get Started Button */}
@@ -74,7 +66,7 @@ export default function Home() {
         <div className="flex gap-4 items-center flex-col sm:flex-row justify-center">
           <Link
             className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="/market"
+            href="/shop"
           >
             <svg
               className="w-5 h-5"
