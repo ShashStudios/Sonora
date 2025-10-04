@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ClerkProvider, SignedIn, UserButton } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -15,13 +14,20 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "BANDS",
-    template: "%s | BANDS",
+    default: "Sonora - Voice-First Accessible E-Commerce",
+    template: "%s | Sonora",
   },
-  description: "BANDS",
+  description: "Voice-first accessible e-commerce platform for everyone. Shop and sell using voice commands, designed for blind, low-vision, and mobility-limited users.",
+  keywords: ["accessibility", "voice commerce", "e-commerce", "a11y", "blind", "low vision", "hands-free shopping"],
+  authors: [{ name: "Shash Panigrahi" }, { name: "Eliot Shytaj" }],
   icons: {
     icon: "/icon.svg",
     apple: "/icon.svg",
+  },
+  openGraph: {
+    title: "Sonora - Voice-First Accessible E-Commerce",
+    description: "Shop and sell using voice. E-commerce for everyone.",
+    type: "website",
   },
 };
 
@@ -31,21 +37,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <div className="min-h-screen">
-            <div className="flex w-full items-center justify-end px-6 py-4 absolute top-0 right-0 z-10">
-              <SignedIn>
-                <UserButton afterSignOutUrl="/" />
-              </SignedIn>
-            </div>
-            <div className="flex-1">{children}</div>
-          </div>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <div className="min-h-screen flex flex-col">
+          {children}
+        </div>
+      </body>
+    </html>
   );
 }

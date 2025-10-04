@@ -1,153 +1,76 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
-// removed unused imports
+import { Mic, Volume2, Accessibility } from "lucide-react";
+import SonoraAgent from "@/components/SonoraAgent";
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 relative">
-      {/* Grid Background */}
-      <div className="absolute inset-0 bg-white">
-        <div 
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              radial-gradient(circle at 20% 20%, transparent 0%, transparent 15%, rgba(0,0,0,0.03) 25%),
-              radial-gradient(circle at 80% 80%, transparent 0%, transparent 20%, rgba(0,0,0,0.02) 35%),
-              linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px)
-            `,
-            backgroundSize: '100% 100%, 100% 100%, 20px 20px, 20px 20px',
-            maskImage: 'radial-gradient(ellipse 120% 100% at 50% 0%, black 0%, black 40%, transparent 70%)'
-          }}
-        />
-      </div>
-
-      {/* Floating Navigation Bar */}
-      <nav className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20 bg-white rounded-full px-8 py-3 shadow-lg border border-gray-100 w-[90%] max-w-6xl">
-        <div className="flex items-center justify-between w-full">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Image
-              src="/b.png"
-              alt="B logo"
-              width={120}
-              height={32}
-              priority
-            />
-          </div>
-
-          {/* Navigation Links */}
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-1 text-gray-500 hover:text-gray-700 cursor-pointer">
-              <span>Blog</span>
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+    <div className="min-h-screen flex flex-col">
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Volume2 className="w-8 h-8 text-blue-600" />
+              <span className="text-2xl font-bold text-gray-900">Sonora</span>
             </div>
-            <Link href="/pricing" className="text-gray-500 hover:text-gray-700">Pricing</Link>
-            <Link href="/mission" className="text-gray-500 hover:text-gray-700">Our Mission</Link>
+            <div className="flex items-center gap-6">
+              <Link href="/marketplace" className="text-gray-600 hover:text-gray-900 font-medium">
+                Marketplace
+              </Link>
+              <Link href="/seller" className="text-gray-600 hover:text-gray-900 font-medium">
+                For Sellers
+              </Link>
+              <Link href="/a11y" className="text-gray-600 hover:text-gray-900 flex items-center gap-2">
+                <Accessibility className="w-5 h-5" />
+                <span>Accessibility</span>
+              </Link>
+            </div>
           </div>
-
-          {/* Get Started Button */}
-          <Link
-            href="/market"
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-          >
-            Get Started
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7V17" />
-            </svg>
-          </Link>
         </div>
       </nav>
-      <main className="flex flex-col gap-[32px] row-start-2 items-center justify-center relative z-10">
-        {/* Main Headline */}
-        <h1 className="text-5xl md:text-6xl font-bold text-black text-center max-w-4xl mt-32 whitespace-nowrap">
-          The First AI Native Marketplace
-        </h1>
 
-        {/* Sub-headline */}
-        <p className="text-xl text-black text-center mb-6 max-w-2xl -mt-8">
-          Powering the AI economy by connecting creators, developers, and businesses. All in one place.
-        </p>
+      {/* Main Content */}
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-b from-white to-gray-50 py-20">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-gray-900 leading-tight">
+              Shop with Your Voice.<br />
+              <span className="text-blue-600">Sell with ease.</span>
+            </h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row justify-center">
-          <Link
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="/market"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 17L17 7M17 7H7M17 7V17"
-              />
-            </svg>
-            Start Shopping
-          </Link>
-          <Link
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-[#7ed957] text-black gap-2 hover:bg-[#6bc84a] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="/learn-more"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
-              />
-            </svg>
-            Become a Seller
-          </Link>
-        </div>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8">
+              E-commerce designed for blind, low-vision, and mobility-limited users. 
+              Everything is voice-first, eyes-free, and hands-free.
+            </p>
+
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-8 max-w-2xl mx-auto">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mic className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-blue-900 mb-3">
+                👋 Sonora is in the bottom-right!
+              </h3>
+              <p className="text-lg text-blue-800 mb-4">
+                Press and hold <kbd className="px-3 py-1 bg-blue-200 rounded font-bold">Enter/Space</kbd> or the mic button to talk.
+              </p>
+              <div className="bg-white rounded-lg p-4 text-left">
+                <p className="font-bold text-gray-900 mb-2">Try saying:</p>
+                <ul className="space-y-2 text-gray-700">
+                  <li>• "Show me the marketplace"</li>
+                  <li>• "Find me headphones under $100"</li>
+                  <li>• "I want to create a store"</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center relative z-10">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://x.com/ShashPanigrahi"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Shash on X"
-        >
-          <Image
-            aria-hidden
-            src="/x.svg"
-            alt="X logo"
-            width={16}
-            height={16}
-          />
-          Shash
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://x.com/EliotShytaj"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Eliot on X"
-        >
-          <Image
-            aria-hidden
-            src="/x.svg"
-            alt="X logo"
-            width={16}
-            height={16}
-          />
-          Eliot
-        </a>
-      </footer>
+
+      {/* Sonora Agent */}
+      <SonoraAgent initialOpen={true} />
     </div>
   );
 }
