@@ -17,9 +17,9 @@ export default function ShopPage() {
   const [statusMessage, setStatusMessage] = useState("Click the dot to start shopping");
   const [conversationActive, setConversationActive] = useState(false);
   const [showCart, setShowCart] = useState(false);
-  const recognitionRef = useRef<unknown>(null);
+  const recognitionRef = useRef<any>(null);
   const conversationActiveRef = useRef(false);
-  const conversationHistoryRef = useRef<Array<{role: string; content: string}>>([]);
+  const conversationHistoryRef = useRef<any[]>([]);
   const { items, addItem, removeItem, updateQuantity, total, itemCount } = useCart();
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export default function ShopPage() {
       
       // Use Web Speech API for STT - LIVE recognition
       console.log("🎯 Initializing speech recognition...");
-      const recognition = new (window as unknown as { webkitSpeechRecognition: new () => unknown }).webkitSpeechRecognition();
+      const recognition = new (window as any).webkitSpeechRecognition();
       recognition.continuous = false; // Stop after first result for faster response
       recognition.interimResults = true; // Show results as you speak
       recognition.lang = 'en-US';
@@ -103,30 +103,117 @@ export default function ShopPage() {
       let finalTranscript = '';
       let interimTranscript = '';
 
+      recognition.onstart = () => {
         console.log("👂 Speech recognition started - speak now!");
       };
 
-      recognition.onresult = async (event: {results: {transcript: string; isFinal: boolean}[]}) => {
+      recognition.onresult = async (event: any) => {
         interimTranscript = '';
-        const result = event.results[event.results.length - 1];
-        const transcript = result.transcript;
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
           
-        if (result.isFinal) {
-          finalTranscript += transcript + ' ';
-          console.log("✅ Final text:", transcript);
-{{ ... }}
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+            console.log("✅ Final text:", transcript);
+          } else {
+            interimTranscript += transcript;
+            console.log("⏳ Interim text:", transcript);
+          }
+        }
+        
+        // Show live transcript
+        setTranscript(finalTranscript + interimTranscript);
+        
+        // If we have final text, stop and respond
+        if (finalTranscript.trim()) {
+          recognition.stop();
+          console.log("🛑 Got final transcript, stopping recognition");
+          
+          setStatusMessage("Thinking...");
+          
+          // Get AI response from OpenAI
+          try {
+            const chatResponse = await fetch("/api/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                message: finalTranscript.trim(),
+                conversationHistory: conversationHistoryRef.current
+              }),
+            });
+
+            if (!chatResponse.ok) {
+              throw new Error("Failed to get AI response");
+            }
+
+            const { response: aiResponse, conversationHistory, cartActions, navigationAction } = await chatResponse.json();
+            conversationHistoryRef.current = conversationHistory;
+            
+            console.log("🤖 AI Response:", aiResponse);
+            
+            // Handle cart actions
+            if (cartActions && cartActions.length > 0) {
+              console.log("🛒 Processing cart actions:", cartActions);
+              cartActions.forEach((action: any) => {
+                if (action.action === "add") {
+                  addItem(action.itemName, action.price);
+                  console.log(`✅ Added ${action.itemName} to cart`);
+                }
+              });
+            }
+            
+            // Handle navigation actions - SIMPLIFIED
+            if (navigationAction === "checkout") {
+              console.log("🧭 Checkout navigation requested - going to checkout page");
+              
+              // Stop conversation and navigate immediately after speaking
+              await speakText(aiResponse, () => {
+                console.log("🚀 Navigating to checkout");
+                setConversationActive(false);
+                conversationActiveRef.current = false;
+                router.push("/checkout");
+              });
+              return;
+            }
+            
+            await speakText(aiResponse, () => {
+              // After speaking, automatically listen again if conversation is active
+              console.log("✅ Response finished. conversationActive:", conversationActiveRef.current);
+              if (conversationActiveRef.current) {
+                setTranscript("");
+                setStatusMessage("🎙️ I'm listening...");
+                setTimeout(() => {
+                  console.log("🔄 Restarting listening after response...");
+                  if (conversationActiveRef.current) {
+                    startListening();
+                  }
+                }, 300);
+              } else {
+                setTimeout(() => {
+                  setStatusMessage("Click to start conversation");
+                  setTranscript("");
+                }, 1000);
+              }
+            });
+          } catch (error) {
+            console.error("❌ Error getting AI response:", error);
+            setStatusMessage("Sorry, I had trouble understanding. Let's try again.");
+            setTimeout(() => {
+              if (conversationActiveRef.current) {
+                startListening();
+              }
             }, 2000);
           }
         }
       };
 
-      recognition.onerror = (event: {error: string}) => {
+      recognition.onerror = (event: any) => {
         console.error("❌ Speech recognition error:", event.error);
         
         if (event.error === 'no-speech') {
           setStatusMessage("I didn't hear anything. Click to try again.");
         } else if (event.error === 'audio-capture') {
-{{ ... }}
           setStatusMessage("Microphone error. Check your settings.");
         } else {
           setStatusMessage("Sorry, I didn't catch that. Click to try again.");
