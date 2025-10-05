@@ -16,10 +16,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "BANDS",
-    template: "%s | BANDS",
+    default: "SONORA",
+    template: "%s | SONORA",
   },
-  description: "BANDS",
+  description: "SONORA - Voice-Native Shopping with AI",
   icons: {
     icon: "/icon.svg",
     apple: "/icon.svg",

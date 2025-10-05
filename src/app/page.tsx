@@ -27,13 +27,9 @@ export default function Home() {
         <div className="flex items-center justify-between w-full">
           {/* Logo */}
           <div className="flex items-center">
-            <Image
-              src="/b.png"
-              alt="B logo"
-              width={120}
-              height={32}
-              priority
-            />
+            <h1 className="text-2xl font-bold tracking-tight text-black">
+              SONORA
+            </h1>
           </div>
 
           {/* Navigation Links */}
