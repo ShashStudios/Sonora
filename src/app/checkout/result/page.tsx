@@ -60,7 +60,6 @@ export default function CheckoutResultPage() {
         const data = await response.json();
         if (data.audioUrl) {
           const audio = new Audio(data.audioUrl);
-          audio.play();
           audio.onended = () => setPlayingReceipt(false);
         }
       }
@@ -69,6 +68,12 @@ export default function CheckoutResultPage() {
       setPlayingReceipt(false);
     }
   };
+
+  useEffect(() => {
+    if (orderId) {
+      fetchOrder();
+    }
+  }, [orderId]);
 
   if (loading) {
     return (
@@ -85,7 +90,9 @@ export default function CheckoutResultPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md">
-          <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-12 h-12 text-green-600" />
+          </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Not Found</h1>
           <p className="text-gray-600 mb-6">
             We couldn't find the order you're looking for.

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Mic, Volume2, Accessibility } from "lucide-react";
+import { Mic, Volume2, Accessibility, ShoppingCart } from "lucide-react";
 import SonoraAgent from "@/components/SonoraAgent";
 
 export default function Home() {
@@ -21,6 +21,10 @@ export default function Home() {
               </Link>
               <Link href="/seller" className="text-gray-600 hover:text-gray-900 font-medium">
                 For Sellers
+              </Link>
+              <Link href="/cart" className="text-gray-600 hover:text-gray-900 flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5" />
+                <span>Cart</span>
               </Link>
               <Link href="/a11y" className="text-gray-600 hover:text-gray-900 flex items-center gap-2">
                 <Accessibility className="w-5 h-5" />

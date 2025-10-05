@@ -36,26 +36,24 @@ export default function SonoraAgent({ initialOpen = false }: SonoraAgentProps) {
   const hasSpokenWelcome = useRef(false);
 
   useEffect(() => {
-    if (messages.length === 0 && isOpen && !hasSpokenWelcome.current) {
-      // Sonora introduces herself (only once ever)
+    // Only speak welcome on very first load
+    if (!hasSpokenWelcome.current && messages.length === 0) {
       hasSpokenWelcome.current = true;
       
       const welcomeMessage: Message = {
         id: 'welcome',
         type: 'sonora',
-        text: "Hi! I'm Sonora. Press and hold the blue button or Space/Enter, then tell me what you need. Try 'Show me the marketplace'.",
+        text: "Hi! I'm Sonora, your voice shopping assistant. Press and hold the blue button or Space/Enter to talk to me.",
         timestamp: new Date(),
       };
       setMessages([welcomeMessage]);
       
       // Play welcome audio only once after delay
       setTimeout(() => {
-        if (hasSpokenWelcome.current) {
-          speakMessage(welcomeMessage.text);
-        }
-      }, 800);
+        speakMessage(welcomeMessage.text);
+      }, 1000);
     }
-  }, [isOpen]);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -201,6 +199,16 @@ export default function SonoraAgent({ initialOpen = false }: SonoraAgentProps) {
       const agentData = await agentResponse.json();
       console.log('✅ Agent response:', agentData.response);
       console.log('🎬 Action:', agentData.action);
+      
+      // Update context with search results BEFORE executing action
+      if (agentData.action?.type === 'search_products' && agentData.action?.results) {
+        setSessionContext(prev => ({
+          ...prev,
+          lastSearchResults: agentData.action.results,
+          lastQuery: agentData.action.query,
+        }));
+        console.log('📦 Updated context with search results:', agentData.action.results.length);
+      }
 
       // Add Sonora's response
       const sonoraMessage: Message = {
@@ -272,8 +280,32 @@ export default function SonoraAgent({ initialOpen = false }: SonoraAgentProps) {
         break;
 
       case 'add_to_cart':
-        // Add product to cart
+        // Add product to cart in localStorage
         console.log('🛒 Adding to cart:', action.product?.name);
+        
+        if (action.product) {
+          const currentCart = JSON.parse(localStorage.getItem('sonora_cart') || '[]');
+          
+          // Check if item already exists
+          const existingIndex = currentCart.findIndex((item: any) => item.id === action.product.id);
+          
+          if (existingIndex >= 0) {
+            // Increase quantity
+            currentCart[existingIndex].quantity += 1;
+          } else {
+            // Add new item
+            currentCart.push({
+              id: action.product.id,
+              name: action.product.name,
+              price: action.product.price,
+              quantity: 1,
+            });
+          }
+          
+          localStorage.setItem('sonora_cart', JSON.stringify(currentCart));
+          console.log('✅ Cart updated:', currentCart);
+        }
+        
         setSessionContext(prev => ({
           ...prev,
           cart: [...(prev.cart || []), action.product],
@@ -284,13 +316,16 @@ export default function SonoraAgent({ initialOpen = false }: SonoraAgentProps) {
         // Navigate to checkout
         console.log('💳 Going to checkout');
         setTimeout(() => {
-          router.push('/checkout');
-        }, 2000);
+          router.push('/cart');
+        }, 1500);
         break;
 
       case 'view_cart':
-        // Show cart summary in message
-        console.log('🛒 Showing cart');
+        // Navigate to cart page
+        console.log('🛒 Going to cart');
+        setTimeout(() => {
+          router.push('/cart');
+        }, 1500);
         break;
 
       default:

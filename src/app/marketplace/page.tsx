@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Store, Search, Volume2, ArrowRight, ShoppingBag } from "lucide-react";
+import { Volume2, Search, Store as StoreIcon, ShoppingCart } from "lucide-react";
 import SonoraAgent from "@/components/SonoraAgent";
 
 interface StoreInfo {
@@ -44,24 +44,20 @@ export default function MarketplacePage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <Volume2 className="w-6 h-6 text-blue-600" />
               <span className="text-xl font-bold text-gray-900">Sonora Marketplace</span>
             </Link>
-            <Link 
-              href="/seller"
-              className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors font-medium"
-            >
-              Become a Seller
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-12">
-        {/* Hero Section */}
+            <div className="flex items-center gap-4">
+              <Link 
+                href="/cart"
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <span>Cart</span>
+              </Link>
+              <Link 
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Voice-First Marketplace

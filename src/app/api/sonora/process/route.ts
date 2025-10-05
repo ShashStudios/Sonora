@@ -57,22 +57,26 @@ User said: "${userMessage}"
 Available products in database:
 ${JSON.stringify(products.slice(0, 10).map(p => ({name: p.name, price: p.price})))}
 
+Context from previous searches:
+${context?.lastSearchResults ? JSON.stringify(context.lastSearchResults.map((p: any) => ({name: p.name, price: p.price}))) : 'None'}
+
 Your task:
 1. Understand what the user wants
-2. Respond conversationally in 2-3 sentences
+2. Respond conversationally in 1-2 sentences
 3. If they're searching for products, describe what you found
+4. If they're adding to cart, confirm the EXACT product they just searched for (from context)
 
 Examples:
 - User: "find me headphones under $100"
   Response: "I found 2 headphones under $100. The Premium Wireless Headphones are $79.99 with great sound quality. Would you like to add one to your cart?"
   
+- User: "add to cart" (after searching for mechanical keyboard)
+  Response: "Added the Mechanical Keyboard for $69.99 to your cart!"
+
 - User: "show me the marketplace"
-  Response: "Taking you to the marketplace now where you can browse all our stores."
+  Response: "Taking you to the marketplace now."
 
-- User: "I want to sell something"
-  Response: "Great! Let me guide you through creating your store. I'll take you to the voice onboarding."
-
-Keep it SHORT, CLEAR, and HELPFUL.`;
+Keep it SHORT, CLEAR, and HELPFUL. When adding to cart, confirm the product from the LAST SEARCH, not a random product.`;
 
     console.log('🔮 Calling Gemini API...');
     const result = await model.generateContent(systemPrompt);
@@ -219,9 +223,17 @@ function inferAction(userMessage: string, products: any[], context: any) {
     };
   }
 
-  if (lower.includes('add') && (lower.includes('cart') || lower.includes('basket'))) {
-    // Add first product in context or search results
-    const product = context?.lastSearchResults?.[0] || products[0];
+  if (lower.includes('add') && (lower.includes('cart') || lower.includes('basket') || lower.includes('card'))) {
+    // Add first product from last search results
+    const product = context?.lastSearchResults?.[0];
+    console.log('🛒 Add to cart - last search results:', context?.lastSearchResults?.map((p: any) => p.name));
+    console.log('🛒 Adding product:', product?.name);
+    
+    if (!product) {
+      console.log('⚠️ No product in context, using first available');
+      return { type: 'add_to_cart', product: products[0] };
+    }
+    
     return { type: 'add_to_cart', product };
   }
 
@@ -229,7 +241,8 @@ function inferAction(userMessage: string, products: any[], context: any) {
     return { type: 'checkout' };
   }
 
-  if (lower.includes('cart') || lower.includes('basket')) {
+  // Recognize "cart", "basket", or "card" (common STT mistake)
+  if (lower.includes('cart') || lower.includes('basket') || lower.includes('card') || lower.includes('my shopping')) {
     return { type: 'view_cart' };
   }
 
