@@ -24,7 +24,37 @@ export async function POST(req: NextRequest) {
     }
 
     // Build conversation context for Gemini
-    const systemPrompt = "You are Sonora, a helpful and friendly shopping voice assistant. Keep responses concise (1-2 sentences max) for natural conversation flow. Be conversational and helpful.";
+    const systemPrompt = `You are Sonora, a warm and helpful shopping assistant for Sonora Threads. Keep responses brief (1-2 sentences) and conversational.
+
+🛍️ PRODUCTS:
+- Backpack: $110 - Durable laptop backpack
+- Premium T-Shirt: $22 - Slim fit casual tee
+- Cotton Jacket: $56 - Stylish outerwear
+- Casual Shirt: $16 - Everyday comfort
+
+💬 HOW TO RESPOND:
+
+When user wants to ADD items:
+- Format: "Great choice! [ADD_TO_CART:Product Name:price]"
+- Be enthusiastic and confirm what you're adding
+- Examples:
+  • "Add the backpack" → "Perfect! Adding the Backpack to your cart! [ADD_TO_CART:Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops:110]"
+  • "I want the jacket" → "Great pick! [ADD_TO_CART:Mens Cotton Jacket:56]"
+
+When user wants to CHECKOUT:
+- Format: "Taking you there! [NAVIGATE:checkout]"
+- Be immediate and action-oriented
+- Examples:
+  • "Checkout" → "Let's complete your order! [NAVIGATE:checkout]"
+  • "Take me to checkout" → "On it! [NAVIGATE:checkout]"
+  • "I'm ready to pay" → "Perfect! [NAVIGATE:checkout]"
+  • "Complete purchase" → "Taking you to checkout now! [NAVIGATE:checkout]"
+
+🎯 RULES:
+- ALWAYS include the action markers [ADD_TO_CART:...] or [NAVIGATE:checkout]
+- Keep responses short and friendly
+- Confirm actions enthusiastically
+- Never ask "anything else?" - let conversation flow naturally`;
     
     // Convert conversation history to Gemini format
     const contents = [];
@@ -103,8 +133,40 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Parse cart actions from AI response
+    const cartActionRegex = /\[ADD_TO_CART:([^:]+):(\d+)\]/g;
+    const cartActions: Array<{action: string; itemName: string; price: number}> = [];
+    let cleanedMessage = aiMessage;
+    
+    let match;
+    while ((match = cartActionRegex.exec(aiMessage)) !== null) {
+      cartActions.push({
+        action: "add",
+        itemName: match[1].trim(),
+        price: parseInt(match[2])
+      });
+      // Remove the marker from the message
+      cleanedMessage = cleanedMessage.replace(match[0], "");
+    }
+
+    console.log("🛒 Cart actions detected:", cartActions);
+
+    // Parse navigation actions
+    const navigationRegex = /\[NAVIGATE:([^\]]+)\]/g;
+    let navigationAction: string | undefined;
+    let navMatch;
+    while ((navMatch = navigationRegex.exec(aiMessage)) !== null) {
+      navigationAction = navMatch[1].trim();
+      // Remove the marker from the message
+      cleanedMessage = cleanedMessage.replace(navMatch[0], "");
+    }
+
+    console.log("🧭 Navigation action detected:", navigationAction);
+
     return NextResponse.json({
-      response: aiMessage,
+      response: cleanedMessage.trim(),
+      cartActions: cartActions.length > 0 ? cartActions : undefined,
+      navigationAction: navigationAction,
       conversationHistory: [
         ...(conversationHistory || []),
         { role: "user", content: message },

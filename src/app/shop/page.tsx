@@ -3,6 +3,9 @@
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import { useCart } from "@/contexts/CartContext";
+import { ShoppingCart, Plus, Minus, Trash2 } from "lucide-react";
+import Link from "next/link";
 
 export default function ShopPage() {
   const { isLoaded, isSignedIn } = useUser();
@@ -11,11 +14,13 @@ export default function ShopPage() {
   const [isListening, setIsListening] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [transcript, setTranscript] = useState("");
-  const [statusMessage, setStatusMessage] = useState("Click to start conversation");
+  const [statusMessage, setStatusMessage] = useState("Click the dot to start shopping");
   const [conversationActive, setConversationActive] = useState(false);
+  const [showCart, setShowCart] = useState(false);
   const recognitionRef = useRef<any>(null);
   const conversationActiveRef = useRef(false);
   const conversationHistoryRef = useRef<any[]>([]);
+  const { items, addItem, removeItem, updateQuantity, total, itemCount } = useCart();
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -142,10 +147,35 @@ export default function ShopPage() {
               throw new Error("Failed to get AI response");
             }
 
-            const { response: aiResponse, conversationHistory } = await chatResponse.json();
+            const { response: aiResponse, conversationHistory, cartActions, navigationAction } = await chatResponse.json();
             conversationHistoryRef.current = conversationHistory;
             
             console.log("🤖 AI Response:", aiResponse);
+            
+            // Handle cart actions
+            if (cartActions && cartActions.length > 0) {
+              console.log("🛒 Processing cart actions:", cartActions);
+              cartActions.forEach((action: any) => {
+                if (action.action === "add") {
+                  addItem(action.itemName, action.price);
+                  console.log(`✅ Added ${action.itemName} to cart`);
+                }
+              });
+            }
+            
+            // Handle navigation actions - SIMPLIFIED
+            if (navigationAction === "checkout") {
+              console.log("🧭 Checkout navigation requested - going to checkout page");
+              
+              // Stop conversation and navigate immediately after speaking
+              await speakText(aiResponse, () => {
+                console.log("🚀 Navigating to checkout");
+                setConversationActive(false);
+                conversationActiveRef.current = false;
+                router.push("/checkout");
+              });
+              return;
+            }
             
             await speakText(aiResponse, () => {
               // After speaking, automatically listen again if conversation is active
@@ -226,44 +256,28 @@ export default function ShopPage() {
       console.error("❌ Error processing audio:", error);
       setStatusMessage("Error processing speech. Click to try again.");
       setTimeout(() => {
-        setStatusMessage("Click to start conversation");
+        setStatusMessage("Click to start shopping");
       }, 3000);
     }
   };
 
   const handleButtonClick = async () => {
     console.log("🖱️ Button clicked. State - isListening:", isListening, "isPlaying:", isPlaying, "conversationActive:", conversationActive);
-    
-    if (conversationActive) {
-      // Stop the conversation
+    if (!conversationActiveRef.current) {
+      // Start conversation
+      console.log("🎤 Starting conversation");
+      setConversationActive(true);
+      conversationActiveRef.current = true;
+      setStatusMessage("🎙️ I'm listening! Try: 'Add the backpack'");
+      startListening();
+    } else {
+      // Stop conversation
       console.log("🛑 Stopping conversation");
       setConversationActive(false);
       conversationActiveRef.current = false;
-      conversationHistoryRef.current = []; // Reset conversation history
-      setIsListening(false);
-      setIsPlaying(false);
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      setStatusMessage("Conversation ended. Click to start again.");
-      setTimeout(() => {
-        setStatusMessage("Click to start conversation");
-        setTranscript("");
-      }, 2000);
-    } else {
-      // Start the conversation flow
-      console.log("🚀 Starting conversation flow");
-      setConversationActive(true);
-      conversationActiveRef.current = true;
-      setStatusMessage("Hi! I'm Sonora...");
-      
-      // Speak introduction (shorter for speed)
-      const intro = "Hi! I'm Sonora, your shopping assistant. How can I help?";
-      await speakText(intro, () => {
-        console.log("✅ Intro finished, starting to listen...");
-        // After intro finishes, automatically start listening
-        startListening();
-      });
+      setStatusMessage("Click to start shopping");
+      stopListening();
+      conversationHistoryRef.current = [];
     }
   };
 
@@ -283,6 +297,118 @@ export default function ShopPage() {
         <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
       </div>
+
+      {/* Floating Cart Button */}
+      <button
+        onClick={() => setShowCart(!showCart)}
+        className="fixed top-8 right-8 z-50 bg-black text-white rounded-full p-4 shadow-2xl hover:scale-110 transition-transform duration-200 flex items-center gap-2"
+      >
+        <ShoppingCart className="w-6 h-6" />
+        {itemCount > 0 && (
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+            {itemCount}
+          </span>
+        )}
+      </button>
+
+      {/* Cart Sidebar */}
+      <div
+        className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-40 transform transition-transform duration-300 ease-in-out ${
+          showCart ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Cart Header */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Your Cart</h2>
+              <button
+                onClick={() => setShowCart(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          {/* Cart Items */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {items.length === 0 ? (
+              <div className="text-center text-gray-500 mt-8">
+                <ShoppingCart className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                <p>Your cart is empty</p>
+                <p className="text-sm mt-2">Start shopping with Sonora!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-gray-50 rounded-lg p-4 flex items-center gap-4"
+                  >
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">{item.name}</h3>
+                      <p className="text-gray-600">${item.price}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="p-1 hover:bg-gray-200 rounded"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <span className="w-8 text-center font-semibold">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="p-1 hover:bg-gray-200 rounded"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="p-1 hover:bg-red-100 text-red-500 rounded ml-2"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Cart Footer */}
+          {items.length > 0 && (
+            <div className="p-6 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-lg font-semibold text-gray-900">Total:</span>
+                <span className="text-2xl font-bold text-gray-900">
+                  ${total.toFixed(2)}
+                </span>
+              </div>
+              <div className="text-center text-sm text-gray-500 mb-4">
+                {itemCount} {itemCount === 1 ? 'item' : 'items'} in cart
+              </div>
+              <Link
+                href="/checkout"
+                className="block w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors text-center"
+              >
+                Proceed to Checkout
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Overlay when cart is open */}
+      {showCart && (
+        <div
+          className="fixed inset-0 bg-black/20 z-30"
+          onClick={() => setShowCart(false)}
+        />
+      )}
 
       <div className="relative z-10 text-center">
         {/* Title */}

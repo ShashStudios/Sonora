@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ClerkProvider, SignedIn, UserButton } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { CartProvider } from "@/contexts/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,14 +37,16 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <div className="min-h-screen">
-            <div className="flex w-full items-center justify-end px-6 py-4 absolute top-0 right-0 z-10">
-              <SignedIn>
-                <UserButton afterSignOutUrl="/" />
-              </SignedIn>
+          <CartProvider>
+            <div className="min-h-screen">
+              <div className="flex w-full items-center justify-end px-6 py-4 absolute top-0 right-0 z-10">
+                <SignedIn>
+                  <UserButton afterSignOutUrl="/" />
+                </SignedIn>
+              </div>
+              <div className="flex-1">{children}</div>
             </div>
-            <div className="flex-1">{children}</div>
-          </div>
+          </CartProvider>
         </body>
       </html>
     </ClerkProvider>
